@@ -1,8 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { getHome } from '@/lib/api';
+import { Sparkles, Flame, Star, Loader2 } from 'lucide-react';
+import { Suspense, useMemo } from 'react';
+import { getHome, getLatest } from '@/lib/api';
 import { Header } from '@/components/header';
 import { MangaCard } from '@/components/manga-card';
 import { MangaGridSkeleton } from '@/components/manga-skeleton';
@@ -13,11 +15,67 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-export default function HomePage() {
-  const { data, isLoading, error } = useQuery({
+function HomeContent() {
+  // Fetch Home Data (Carousel + Popular + Latest Page 1)
+  const homeQuery = useQuery({
     queryKey: ['home'],
     queryFn: getHome,
   });
+
+  // Infinite Query for Latest Updates
+  const latestInfiniteQuery = useInfiniteQuery({
+    queryKey: ['latest-infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      // Page 1 data comes from homeQuery, so start fetching from page 2
+      if (pageParam === 1) {
+        // Return empty for page 1, we'll use homeQuery data
+        return { data: [], page: 1 };
+      }
+      const data = await getLatest(pageParam);
+      return { data, page: pageParam };
+    },
+    getNextPageParam: (lastPage) => {
+      // Always allow next page (infinite scroll)
+      return lastPage.page + 1;
+    },
+    initialPageParam: 1,
+  });
+
+  // Determine what data to show
+  const popularManga = homeQuery.data?.popular;
+  
+  // Combine home page data + infinite query pages, then deduplicate
+  const allLatestManga = useMemo(() => {
+    const seen = new Set<string>();
+    const result: any[] = [];
+    
+    // First, add page 1 data from homeQuery
+    if (homeQuery.data?.latest) {
+      homeQuery.data.latest.forEach((manga: any) => {
+        if (!seen.has(manga.slug)) {
+          seen.add(manga.slug);
+          result.push(manga);
+        }
+      });
+    }
+    
+    // Then add data from infinite query pages
+    if (latestInfiniteQuery.data?.pages) {
+      latestInfiniteQuery.data.pages.forEach((page) => {
+        page.data.forEach((manga: any) => {
+          if (!seen.has(manga.slug)) {
+            seen.add(manga.slug);
+            result.push(manga);
+          }
+        });
+      });
+    }
+    
+    return result;
+  }, [homeQuery.data?.latest, latestInfiniteQuery.data?.pages]);
+
+  const isInitialLoading = homeQuery.isLoading;
+  const isError = homeQuery.isError;
 
   return (
     <div className="min-h-screen bg-background pb-12">
@@ -27,57 +85,99 @@ export default function HomePage() {
         
         {/* Hero Section */}
         <section>
-          {!isLoading && !error && data?.popular && (
-            <HeroCarousel mangaList={data.popular} />
+          {!homeQuery.isLoading && !homeQuery.error && popularManga && (
+            <HeroCarousel mangaList={popularManga} />
           )}
-          {isLoading && <Skeleton className="w-full aspect-[21/9] md:aspect-[30/9] rounded-xl" />}
+          {homeQuery.isLoading && <Skeleton className="w-full aspect-[21/9] md:aspect-[30/9] rounded-xl" />}
         </section>
 
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* Main Content: Latest Updates */}
-          <div className="flex-1 min-w-0">
-             <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                   <div className="w-1.5 h-8 bg-gradient-to-b from-primary to-purple-600 rounded-full"></div>
-                   <h2 className="text-2xl font-bold tracking-tight">Update Terbaru</h2>
+          {/* Main Content: Latest Updates with Infinite Scroll */}
+          <div className="flex-1 min-w-0" id="latest-updates">
+             {/* Section Header - Enhanced */}
+             <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                   <div className="p-3 bg-gradient-to-br from-primary/20 to-blue-500/20 rounded-xl
+                     backdrop-blur-sm border border-primary/20 shadow-lg shadow-primary/10">
+                     <Sparkles className="w-6 h-6 text-primary" />
+                   </div>
+                   <div>
+                     <h2 className="text-2xl md:text-3xl font-bold tracking-tight
+                       bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                       Update Terbaru
+                     </h2>
+                     <p className="text-sm text-muted-foreground mt-0.5">Manga terbaru yang baru diupdate</p>
+                   </div>
                 </div>
-                <Link href="/latest" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Lihat Semua →
-                </Link>
              </div>
 
-             {isLoading ? (
+             {isInitialLoading ? (
                <MangaGridSkeleton count={12} />
-             ) : error ? (
+             ) : isError ? (
                 <div className="text-center py-12 border border-dashed border-border rounded-lg">
                   <p className="text-muted-foreground">Gagal memuat data.</p>
                 </div>
              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {data?.latest.map((manga) => (
-                    <MangaCard key={manga.slug} manga={manga} />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {allLatestManga.map((manga, index) => (
+                      <MangaCard key={`${manga.slug}-${index}`} manga={manga} />
+                    ))}
+                  </div>
+
+                  {/* Load More Button - Gradient Style */}
+                  <div className="flex justify-center mt-16">
+                    <Button 
+                      size="lg"
+                      onClick={() => latestInfiniteQuery.fetchNextPage()}
+                      disabled={latestInfiniteQuery.isFetchingNextPage}
+                      className="min-w-[240px] h-14 rounded-full
+                        bg-gradient-to-r from-primary via-blue-500 to-primary
+                        bg-[length:200%_100%] animate-gradient
+                        hover:shadow-lg hover:shadow-primary/30
+                        hover:-translate-y-1
+                        transition-all duration-300
+                        text-white font-semibold text-base
+                        border-none"
+                    >
+                      {latestInfiniteQuery.isFetchingNextPage ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Memuat...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5 mr-2" />
+                          Muat Lebih Banyak
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </>
              )}
           </div>
 
-          {/* Sidebar */}
-          <aside className="w-full lg:w-80 shrink-0 space-y-8">
+          {/* Sidebar - Enhanced */}
+          <aside className="w-full lg:w-80 shrink-0 space-y-8 hidden lg:block">
              {/* Popular List in Sidebar */}
-             <Card className="bg-card/50 border-border/50">
-               <CardHeader className="pb-3 border-b border-border/50">
-                 <CardTitle className="text-lg flex items-center gap-2">
-                   <span className="text-orange-500">🔥</span>
-                   Konsep Populer
+             <Card className="bg-card border-white/10 overflow-hidden">
+               <CardHeader className="pb-4 border-b border-white/10">
+                 <CardTitle className="text-lg flex items-center gap-3 font-bold">
+                   <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg shadow-lg shadow-orange-500/30">
+                      <Flame className="w-4 h-4 text-white" />
+                   </div>
+                   <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">
+                     Populer
+                   </span>
                  </CardTitle>
                </CardHeader>
-               <CardContent className="pt-4 px-0">
-                 {isLoading ? (
-                    <div className="px-4 space-y-4">
+               <CardContent className="pt-0 px-0">
+                 {homeQuery.isLoading ? (
+                    <div className="p-4 space-y-4">
                        {[1,2,3,4,5].map(i => (
                          <div key={i} className="flex gap-3">
-                            <Skeleton className="w-16 h-24 rounded" />
+                            <Skeleton className="w-16 h-24 rounded-md" />
                             <div className="flex-1 space-y-2 py-1">
                                <Skeleton className="h-4 w-full" />
                                <Skeleton className="h-3 w-1/2" />
@@ -86,65 +186,80 @@ export default function HomePage() {
                        ))}
                     </div>
                  ) : (
-                    <div className="divide-y divide-border/30">
-                       {data?.popular.slice(0, 8).map((manga, index) => (
+                    <div className="divide-y divide-white/5">
+                       {popularManga?.slice(0, 5).map((manga: any, index: number) => (
                          <Link 
-                           href={`/manga/${manga.slug}`} 
+                           href={`/manga/${manga.slug}?${new URLSearchParams({
+                             ...(manga.source && { source: manga.source }),
+                             ...(manga.cover && { cover: manga.cover })
+                           }).toString()}`} 
                            key={manga.slug}
-                           className="flex gap-4 p-4 hover:bg-muted/40 transition-colors group"
+                           className="flex gap-4 p-4 hover:bg-white/5 transition-all duration-300 group relative"
                          >
-                            <div className="relative w-16 aspect-[2/3] shrink-0 rounded overflow-hidden shadow-sm">
-                              <span className={`absolute top-0 left-0 w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white z-10 ${
-                                index < 3 ? 'bg-orange-500' : 'bg-gray-600'
+                            {/* Rank Number - Modern Style */}
+                            <div className={`absolute top-4 left-4 z-10 w-7 h-7 flex items-center justify-center 
+                              text-xs font-bold text-white rounded-lg shadow-lg ${
+                                index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-orange-500/40' :
+                                index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 shadow-slate-400/30' :
+                                index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800 shadow-amber-600/30' :
+                                'bg-white/10 backdrop-blur-md'
                               }`}>
                                 {index + 1}
-                              </span>
-                               {/* Using pure HTML img for sidebar for simplicty or Image component */}
+                              </div>
+
+                            <div className="relative w-16 aspect-[2/3] shrink-0 rounded-lg overflow-hidden 
+                              shadow-lg group-hover:shadow-xl group-hover:shadow-primary/20 transition-all">
                                <img 
                                  src={manga.cover} 
                                  alt={manga.title} 
                                  className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                                />
                             </div>
-                            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                               <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                            <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+                               <h4 className="font-semibold text-sm line-clamp-2 leading-snug 
+                                 text-white/90 group-hover:text-primary transition-colors">
                                  {manga.title}
                                </h4>
-                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                               <div className="flex items-center gap-2 text-xs">
                                  {manga.type && (
-                                    <span className="uppercase">{manga.type}</span>
+                                    <Badge className={`h-5 px-2 text-[10px] font-medium border-none ${
+                                      manga.type.toLowerCase() === 'manhwa' 
+                                        ? 'bg-orange-500/20 text-orange-400' 
+                                        : manga.type.toLowerCase() === 'manhua' 
+                                          ? 'bg-purple-500/20 text-purple-400' 
+                                          : 'bg-blue-500/20 text-blue-400'
+                                    }`}>
+                                       {manga.type}
+                                    </Badge>
                                  )}
-                                 <span>•</span>
-                                 {manga.rating ? (
-                                   <span className="flex items-center gap-0.5 text-yellow-500">
-                                      ★ {manga.rating}
-                                   </span>
-                                 ) : (
-                                   <span>{manga.chapter?.replace('Chapter ', 'Ch. ')}</span>
-                                 )}
+                                 <div className="flex items-center gap-1 text-yellow-400 font-medium">
+                                    <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                                    <span>{manga.rating || 'N/A'}</span>
+                                 </div>
                                </div>
                             </div>
                          </Link>
                        ))}
                     </div>
                  )}
-                 <div className="p-4 pt-2">
-                    <Button variant="outline" className="w-full text-xs h-8">
-                       Lihat Semua Populer
-                    </Button>
-                 </div>
                </CardContent>
              </Card>
 
-             {/* Genres Cloud Check (Static for now) */}
-             <Card className="bg-card/50 border-border/50">
-               <CardHeader className="pb-3 border-b border-border/50">
-                 <CardTitle className="text-lg">Genre</CardTitle>
+             {/* Genres Cloud - Enhanced */}
+             <Card className="bg-gradient-to-b from-card/60 to-transparent backdrop-blur-xl 
+               border-white/10 overflow-hidden">
+               <CardHeader className="pb-3 border-b border-white/10">
+                 <CardTitle className="text-lg font-bold bg-gradient-to-r from-white to-white/60 
+                   bg-clip-text text-transparent">Genre</CardTitle>
                </CardHeader>
                <CardContent className="pt-4">
                   <div className="flex flex-wrap gap-2">
                      {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Harem', 'Romance', 'Seinen', 'Shounen', 'Slice of Life'].map(g => (
-                        <Badge key={g} variant="secondary" className="hover:bg-primary hover:text-white cursor-pointer transition-colors">
+                        <Badge key={g} variant="secondary" 
+                          className="bg-white/5 hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 
+                            border-white/10 hover:border-transparent
+                            text-white/70 hover:text-white 
+                            cursor-pointer transition-all duration-300 hover:-translate-y-0.5">
                            {g}
                         </Badge>
                      ))}
@@ -156,47 +271,64 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border/40 py-12 mt-12 bg-card/30 backdrop-blur-sm">
-        <div className="container max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-center md:text-left">
-            <div className="space-y-4 md:col-span-2">
-               <h1 className="text-3xl font-extrabold tracking-tight">
+      {/* Footer - Premium Design */}
+      <footer className="relative border-t border-white/10 py-16 mt-16 overflow-hidden">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-card to-transparent" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+        
+        <div className="container max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-center md:text-left">
+            <div className="space-y-6 md:col-span-2">
+               <h1 className="text-4xl font-black tracking-tight">
                  <span className="text-white">Manga</span>
-                 <span className="text-primary">Ku</span>
+                 <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">Ku</span>
                </h1>
-               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
-                 Platform baca manga favoritmu dengan tampilan modern, cepat, dan nyaman. Nikmati ribuan judul komik secara gratis.
+               <p className="text-muted-foreground text-sm leading-relaxed max-w-md mx-auto md:mx-0">
+                 Platform baca manga favoritmu dengan tampilan modern, cepat, dan nyaman. 
+                 Nikmati ribuan judul manga, manhwa, dan manhua secara gratis.
                </p>
+               <div className="flex gap-3 justify-center md:justify-start">
+                 {/* Social Icons Placeholder */}
+               </div>
             </div>
             
-            <div className="space-y-4 off">
-               <h3 className="font-semibold text-white">Navigasi</h3>
-               <ul className="space-y-2 text-sm text-muted-foreground">
-                 <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
-                 <li><Link href="/popular" className="hover:text-primary transition-colors">Populer</Link></li>
-                 <li><Link href="/bookmarks" className="hover:text-primary transition-colors">Bookmark</Link></li>
+            <div className="space-y-4">
+               <h3 className="font-bold text-white text-lg">Navigasi</h3>
+               <ul className="space-y-3 text-sm">
+                 <li><Link href="/" className="text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
+                 <li><Link href="/popular" className="text-muted-foreground hover:text-primary transition-colors">Populer</Link></li>
+                 <li><Link href="/bookmarks" className="text-muted-foreground hover:text-primary transition-colors">Bookmark</Link></li>
                </ul>
             </div>
 
             <div className="space-y-4">
-               <h3 className="font-semibold text-white">Legal</h3>
-               <ul className="space-y-2 text-sm text-muted-foreground">
-                 <li><Link href="/dmca" className="hover:text-primary transition-colors">DMCA</Link></li>
-                 <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-                 <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+               <h3 className="font-bold text-white text-lg">Legal</h3>
+               <ul className="space-y-3 text-sm">
+                 <li><Link href="/dmca" className="text-muted-foreground hover:text-primary transition-colors">DMCA</Link></li>
+                 <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
+                 <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
                </ul>
             </div>
           </div>
           
-          <Separator className="my-8 bg-border/40" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-8" />
           
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground text-center md:text-left">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground/60 text-center md:text-left">
             <p>&copy; {new Date().getFullYear()} MangaKu. All rights reserved.</p>
-            <p>Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
+            <p>Disclaimer: This site does not store any files on its server.</p>
           </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <HomeContent />
+    </Suspense>
   );
 }
