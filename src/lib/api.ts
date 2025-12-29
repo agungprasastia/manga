@@ -14,6 +14,7 @@ export interface Manga {
     type?: string;
     chapter?: string;
     rating?: string;
+    source?: 'komiku' | 'kiryuu';
 }
 
 export interface Chapter {
@@ -29,9 +30,11 @@ export interface MangaDetail {
     synopsis: string;
     status?: string;
     author?: string;
+    type?: string;
     genres: string[];
     rating?: string;
     chapters: Chapter[];
+    source?: 'komiku' | 'kiryuu';
 }
 
 export interface ChapterImages {
@@ -39,6 +42,8 @@ export interface ChapterImages {
     images: string[];
     prevChapter?: string;
     nextChapter?: string;
+    mangaSlug?: string;
+    source?: string;
 }
 
 export interface HomeData {
@@ -60,6 +65,16 @@ export async function getHome(): Promise<HomeData> {
     return res.data.data;
 }
 
+export async function getLatest(page: number = 1): Promise<Manga[]> {
+    const res = await api.get<ApiResponse<Manga[]>>('/latest', {
+        params: { page },
+    });
+    if (!res.data.success || !res.data.data) {
+        throw new Error(res.data.error || 'Failed to fetch latest updates');
+    }
+    return res.data.data;
+}
+
 export async function searchManga(query: string): Promise<Manga[]> {
     const res = await api.get<ApiResponse<Manga[]>>('/search', {
         params: { q: query },
@@ -70,16 +85,20 @@ export async function searchManga(query: string): Promise<Manga[]> {
     return res.data.data;
 }
 
-export async function getMangaDetail(slug: string): Promise<MangaDetail> {
-    const res = await api.get<ApiResponse<MangaDetail>>(`/manga/${slug}`);
+export async function getMangaDetail(slug: string, source?: 'komiku' | 'kiryuu'): Promise<MangaDetail> {
+    const res = await api.get<ApiResponse<MangaDetail>>(`/manga/${slug}`, {
+        params: { source },
+    });
     if (!res.data.success || !res.data.data) {
         throw new Error(res.data.error || 'Manga not found');
     }
     return res.data.data;
 }
 
-export async function getChapter(slug: string): Promise<ChapterImages> {
-    const res = await api.get<ApiResponse<ChapterImages>>(`/chapter/${slug}`);
+export async function getChapter(slug: string, source?: 'komiku' | 'kiryuu'): Promise<ChapterImages> {
+    const res = await api.get<ApiResponse<ChapterImages>>(`/chapter/${slug}`, {
+        params: { source },
+    });
     if (!res.data.success || !res.data.data) {
         throw new Error(res.data.error || 'Chapter not found');
     }

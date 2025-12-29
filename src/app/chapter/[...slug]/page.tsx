@@ -14,17 +14,25 @@ export default function ChapterReaderPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const source = searchParams.get('source') as 'komiku' | 'kiryuu' | undefined;
-  
+  const coverParam = searchParams.get('cover'); // Get cover param
+
   const slugParts = params.slug as string[];
   const slug = slugParts?.join('/') || '';
   const [showUI, setShowUI] = useState(true);
   const [progress, setProgress] = useState(0);
 
-  const { data: chapter, isLoading, error } = useQuery({
+  const { data: chapterData, isLoading: isChapterLoading, error: chapterError } = useQuery({
     queryKey: ['chapter', slug, source],
     queryFn: () => getChapter(slug, source),
     enabled: !!slug,
   });
+
+  // Fetch manga details to get full chapter list for fallback navigation (future enhancement)
+  // const { data: manga } = useQuery({ ... });
+
+  const chapter = chapterData;
+  const isLoading = isChapterLoading;
+  const error = chapterError;
 
   // Handle scroll progress
   useEffect(() => {
@@ -42,13 +50,13 @@ export default function ChapterReaderPage() {
     (e: KeyboardEvent) => {
       if (!chapter) return;
       if (e.key === 'ArrowLeft' && chapter.prevChapter) {
-        router.push(`/chapter/${chapter.prevChapter}${source ? `?source=${source}` : ''}`);
+        router.push(`/chapter/${chapter.prevChapter}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
       }
       else if (e.key === 'ArrowRight' && chapter.nextChapter) {
-        router.push(`/chapter/${chapter.nextChapter}${source ? `?source=${source}` : ''}`);
+        router.push(`/chapter/${chapter.nextChapter}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
       }
     },
-    [chapter, router, source]
+    [chapter, router, source, coverParam]
   );
 
   useEffect(() => {
@@ -118,7 +126,13 @@ export default function ChapterReaderPage() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => router.back()}
+                onClick={() => {
+                  if (chapter?.mangaSlug) {
+                    router.push(`/manga/${chapter.mangaSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
+                  } else {
+                    router.back();
+                  }
+                }}
                 className="gap-2 rounded-full text-white/70 hover:text-white hover:bg-white/10"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -193,7 +207,7 @@ export default function ChapterReaderPage() {
               disabled={!chapter.prevChapter}
               onClick={(e) => {
                 e.stopPropagation();
-                if(chapter.prevChapter) router.push(`/chapter/${chapter.prevChapter}${source ? `?source=${source}` : ''}`);
+                if(chapter.prevChapter) router.push(`/chapter/${chapter.prevChapter}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
               }}
               className="flex-1 h-12 rounded-xl bg-white/5 border-white/10 text-white 
                 hover:bg-white/10 hover:border-white/20
@@ -213,7 +227,7 @@ export default function ChapterReaderPage() {
               disabled={!chapter.nextChapter}
               onClick={(e) => {
                 e.stopPropagation();
-                if(chapter.nextChapter) router.push(`/chapter/${chapter.nextChapter}${source ? `?source=${source}` : ''}`);
+                if(chapter.nextChapter) router.push(`/chapter/${chapter.nextChapter}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
               }}
               className="flex-1 h-12 rounded-xl
                 bg-gradient-to-r from-primary to-blue-500 
