@@ -47,7 +47,7 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
         <div className="flex">
           {carouselItems.map((manga, index) => (
             <div key={manga.slug} className="relative flex-[0_0_100%] min-w-0">
-              <div className="relative aspect-[21/9] md:aspect-[30/9] w-full">
+              <div className="relative aspect-[4/3] sm:aspect-[21/9] md:aspect-[30/9] w-full">
                 
                 {/* Background Image (Blurred) */}
                 <div className="absolute inset-0 block">

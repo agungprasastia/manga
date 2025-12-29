@@ -15,6 +15,7 @@ export function Header() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -72,14 +73,14 @@ export function Header() {
   return (
     <header 
       className={`sticky top-0 z-50 w-full transition-all duration-500 ${
-        isScrolled 
+        isScrolled || isMobileMenuOpen
           ? 'bg-background/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20' 
           : 'bg-transparent border-b border-transparent'
       }`}
     >
       <div className="container max-w-7xl h-18 py-4 flex items-center justify-between gap-6">
         {/* Logo - Enhanced with Glow */}
-        <Link href="/" className="shrink-0 group relative">
+        <Link href="/" className="shrink-0 group relative z-50" onClick={() => setIsMobileMenuOpen(false)}>
           <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-purple-500/20 
             rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <h1 className="relative text-3xl font-black tracking-tight">
@@ -91,7 +92,7 @@ export function Header() {
           </h1>
         </Link>
 
-        {/* Search Bar - Glassmorphism Style */}
+        {/* Search Bar - Glassmorphism Style (Desktop) */}
         <div className="flex-1 max-w-xl mx-auto hidden md:block" ref={searchRef}>
           <form onSubmit={handleSearch} className="relative group">
             {/* Gradient border effect */}
@@ -221,8 +222,8 @@ export function Header() {
           </form>
         </div>
 
-        {/* Navigation - Modern Style */}
-        <nav className="flex items-center gap-1 shrink-0">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1 shrink-0">
           <Link href="/">
             <Button variant="ghost" className="text-sm font-medium text-white/80 
               hover:text-white hover:bg-white/10 rounded-full px-5 transition-all">
@@ -235,10 +236,62 @@ export function Header() {
               Bookmark
             </Button>
           </Link>
-          <Button variant="ghost" size="icon" className="md:hidden text-white/80 hover:text-white">
-            <Menu className="h-6 w-6" />
-          </Button>
         </nav>
+
+        {/* Mobile Toggle */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:hidden text-white/80 hover:text-white relative z-50"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
+        </Button>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 bg-background/95 backdrop-blur-2xl z-40 
+            flex flex-col pt-24 px-6 gap-8 animate-in fade-in duration-200">
+            
+            {/* Mobile Search */}
+            <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
+               <div className="relative flex items-center">
+                <Search className="absolute left-4 w-5 h-5 text-white/50" />
+                <Input
+                  type="search"
+                  placeholder="Cari komik..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border-white/10 h-14 pl-12 rounded-2xl
+                    focus:border-primary/50 text-lg"
+                />
+               </div>
+            </form>
+
+            <nav className="flex flex-col gap-4">
+              <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-lg h-14 rounded-xl
+                  text-white/80 hover:text-white hover:bg-white/5 border border-white/5">
+                   Home
+                </Button>
+              </Link>
+              <Link href="/bookmarks" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-lg h-14 rounded-xl
+                  text-white/80 hover:text-white hover:bg-white/5 border border-white/5">
+                   Bookmark
+                </Button>
+              </Link>
+            </nav>
+            
+            <div className="mt-auto pb-12 text-center text-white/30 text-xs">
+              MangaKu Mobile v2.0
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

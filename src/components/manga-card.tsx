@@ -67,7 +67,7 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
         )}
 
         {/* Content positioned at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 space-y-1.5 sm:space-y-2
           transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
           
           {/* Rating Badge */}
