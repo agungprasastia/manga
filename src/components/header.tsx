@@ -7,8 +7,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, X, Loader2, Sparkles } from 'lucide-react';
+import { Search, Menu, X, Loader2, Sparkles, Home, Bookmark, ChevronRight } from 'lucide-react';
 import { searchManga } from '@/lib/api';
+import { animate, stagger } from 'animejs';
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,8 +17,11 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false); // Mobile search state
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const menuItemsRef = useRef<HTMLDivElement>(null);
 
   // Debounce logic
   useEffect(() => {
@@ -70,20 +74,56 @@ export function Header() {
     }
   };
 
+  // Lock Body Scroll when Menu is Open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      
+      // Animate drawer panel
+      if (drawerRef.current) {
+        animate(drawerRef.current, {
+          translateX: ['100%', '0%'],
+          opacity: [0, 1],
+          duration: 400,
+          ease: 'outExpo'
+        });
+      }
+      
+      // Animate menu items with stagger
+      if (menuItemsRef.current) {
+        const menuItems = menuItemsRef.current.querySelectorAll('.menu-item');
+        animate(menuItems, {
+          translateX: [50, 0],
+          opacity: [0, 1],
+          delay: stagger(80, { start: 200 }),
+          duration: 500,
+          ease: 'outExpo'
+        });
+      }
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <header 
       className={`sticky top-0 z-50 w-full transition-all duration-500 ${
-        isScrolled || isMobileMenuOpen
-          ? 'bg-background/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20' 
-          : 'bg-transparent border-b border-transparent'
+        isMobileMenuOpen 
+          ? 'bg-transparent border-transparent' // Let the overlay handle the background
+          : isScrolled
+            ? 'bg-background/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20' 
+            : 'bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="container max-w-7xl h-18 py-4 flex items-center justify-between gap-6">
+      <div className="container max-w-7xl h-18 py-3 sm:py-4 px-4 sm:px-6 flex items-center justify-between gap-3 sm:gap-6">
         {/* Logo - Enhanced with Glow */}
         <Link href="/" className="shrink-0 group relative z-50" onClick={() => setIsMobileMenuOpen(false)}>
           <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-purple-500/20 
             rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <h1 className="relative text-3xl font-black tracking-tight">
+          <h1 className="relative text-2xl sm:text-3xl font-black tracking-tight">
             <span className="text-white group-hover:text-transparent group-hover:bg-clip-text 
               group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-blue-200 
               transition-all duration-300">Manga</span>
@@ -108,7 +148,7 @@ export function Header() {
                 onFocus={() => { if (debouncedQuery.length > 2) setShowResults(true); }}
                 className="w-full bg-white/5 backdrop-blur-md border-white/10 
                   focus:bg-white/10 focus:border-primary/50 
-                  transition-all duration-300 rounded-full pl-6 pr-20 h-12 text-sm
+                  transition-all duration-300 rounded-full pl-4 sm:pl-6 pr-16 sm:pr-20 h-10 sm:h-12 text-xs sm:text-sm
                   placeholder:text-white/40"
               />
               
@@ -116,26 +156,26 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
-                  className="absolute right-14 p-1.5 text-white/50 hover:text-white 
+                  className="absolute right-12 sm:right-14 p-1.5 text-white/50 hover:text-white 
                     rounded-full hover:bg-white/10 transition-all"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
               )}
               
               <Button
                 type="submit"
                 size="icon"
-                className="absolute right-1.5 w-9 h-9 rounded-full 
+                className="absolute right-1.5 w-8 h-8 sm:w-9 sm:h-9 rounded-full 
                   bg-gradient-to-r from-primary to-blue-500 
                   hover:from-primary/90 hover:to-blue-400
                   shadow-lg shadow-primary/30 
                   transition-all duration-300 hover:scale-105"
               >
                 {isLoading && searchQuery.length > 2 ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-white" />
                 ) : (
-                  <Search className="h-4 w-4 text-white" />
+                  <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                 )}
               </Button>
             </div>
@@ -238,59 +278,108 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Mobile Toggle */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="md:hidden text-white/80 hover:text-white relative z-50"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
+        {/* Mobile Actions: Search & Menu */}
+        <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Search Toggle */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-white/80 hover:text-white"
+            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+          >
+            <Search className="h-6 w-6" />
+          </Button>
+
+          {/* Mobile Menu Toggle */}
+          {!isMobileMenuOpen && (
+            <Button
+              variant="ghost" 
+              size="icon" 
+              className="text-white/80 hover:text-white relative z-[110] transition-all duration-300"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
           )}
-        </Button>
+        </div>
 
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 bg-background/95 backdrop-blur-2xl z-40 
-            flex flex-col pt-24 px-6 gap-8 animate-in fade-in duration-200">
-            
-            {/* Mobile Search */}
-            <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
-               <div className="relative flex items-center">
-                <Search className="absolute left-4 w-5 h-5 text-white/50" />
-                <Input
-                  type="search"
-                  placeholder="Cari komik..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border-white/10 h-14 pl-12 rounded-2xl
-                    focus:border-primary/50 text-lg"
-                />
-               </div>
-            </form>
-
-            <nav className="flex flex-col gap-4">
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-lg h-14 rounded-xl
-                  text-white/80 hover:text-white hover:bg-white/5 border border-white/5">
-                   Home
-                </Button>
-              </Link>
-              <Link href="/bookmarks" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start text-lg h-14 rounded-xl
-                  text-white/80 hover:text-white hover:bg-white/5 border border-white/5">
-                   Bookmark
-                </Button>
-              </Link>
-            </nav>
-            
-            <div className="mt-auto pb-12 text-center text-white/30 text-xs">
-              MangaKu Mobile v2.0
-            </div>
+        {/* Mobile Search Bar Overlay */}
+        {isMobileSearchOpen && (
+          <div className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 p-4 animate-in slide-in-from-top-2 duration-200 shadow-2xl z-40">
+             <form onSubmit={(e) => { handleSearch(e); setIsMobileSearchOpen(false); }} className="relative">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+               <Input
+                 type="search"
+                 autoFocus
+                 placeholder="Cari manga..."
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 className="w-full bg-white/5 border-white/10 h-12 pl-12 rounded-xl
+                   focus:border-primary/50 text-base placeholder:text-white/30 text-white"
+               />
+             </form>
           </div>
+        )}
+
+        {/* Mobile Menu Sidebar (Drawer) */}
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm animate-in fade-in duration-300"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Drawer Panel */}
+            <div 
+              ref={drawerRef}
+              className="fixed inset-y-0 right-0 z-[101] w-[80%] sm:w-[350px] 
+              bg-[#0a0a0a] border-l border-white/10 shadow-2xl shadow-black
+              flex flex-col p-6"
+              style={{ transform: 'translateX(100%)', opacity: 0 }}
+            >
+              
+              <div className="flex items-center justify-end mb-8">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white/50 hover:text-white bg-transparent hover:bg-transparent active:bg-transparent rounded-full transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <X className="w-6 h-6" />
+                </Button>
+              </div>
+
+              {/* No Search Here as requested */}
+
+              <nav ref={menuItemsRef} className="flex flex-col gap-2">
+                {[
+                  { href: "/", label: "Home", icon: Home },
+                  { href: "/bookmarks", label: "Bookmark", icon: Bookmark },
+                ].map((item) => (
+                  <Link key={item.href} href={item?.href || '#'} onClick={() => setIsMobileMenuOpen(false)} className="menu-item" style={{ opacity: 0, transform: 'translateX(50px)' }}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-14 rounded-xl mb-2
+                      text-white/70 hover:text-white hover:bg-white/5 group relative overflow-hidden"
+                    >
+                       <div className="w-10 h-10 rounded-lg bg-white/5 group-hover:bg-primary/20 
+                         flex items-center justify-center mr-4 transition-colors duration-300">
+                         <item.icon className="w-5 h-5 group-hover:text-primary transition-colors" />
+                       </div>
+                       <span className="font-medium">{item.label}</span>
+                       <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-50 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                    </Button>
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Footer / Copyright in Menu */}
+              <div className="mt-auto pt-8 border-t border-white/5 animate-in fade-in delay-500 duration-700">
+                 <p className="text-white/30 text-xs text-center">
+                   &copy; 2025 MangaKu App. <br/> Made with ❤️
+                 </p>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </header>

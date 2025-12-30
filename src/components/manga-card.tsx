@@ -22,11 +22,11 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
       href={href} 
       className="block group"
     >
-      <div className="relative aspect-[3/4.5] overflow-hidden rounded-xl bg-muted/50 
+      <div className="relative aspect-[3/4.5] overflow-hidden rounded-lg sm:rounded-xl bg-muted/50 
         shadow-lg shadow-black/20
         transition-all duration-500 ease-out
         group-hover:shadow-2xl group-hover:shadow-primary/20
-        group-hover:-translate-y-2
+        group-hover:-translate-y-1 sm:group-hover:-translate-y-2
         group-hover:ring-2 group-hover:ring-primary/30
         ">
         
@@ -52,7 +52,7 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
         {/* Type Badge - Glowing */}
         {manga.type && (
           <Badge
-            className={`absolute top-3 right-3 text-[10px] h-6 px-2 font-bold uppercase tracking-wider 
+            className={`absolute top-2 right-2 sm:top-3 sm:right-3 text-[9px] sm:text-[10px] h-5 sm:h-6 px-1.5 sm:px-2 font-bold uppercase tracking-wider 
               border-none text-white shadow-lg backdrop-blur-md
               ${
                 manga.type.toLowerCase() === 'manhwa' 
@@ -67,20 +67,20 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
         )}
 
         {/* Content positioned at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 space-y-1.5 sm:space-y-2
+        <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3 md:p-4 space-y-1 sm:space-y-1.5 md:space-y-2
           transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
           
           {/* Rating Badge */}
           {manga.rating && (
-            <div className="inline-flex items-center gap-1.5 bg-black/50 backdrop-blur-sm 
-              rounded-full px-2.5 py-1 text-yellow-400 text-xs font-bold">
-              <Star className="w-3.5 h-3.5 fill-yellow-400" />
+            <div className="inline-flex items-center gap-1 sm:gap-1.5 bg-black/50 backdrop-blur-sm 
+              rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-yellow-400 text-[10px] sm:text-xs font-bold">
+              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-yellow-400" />
               <span>{manga.rating}</span>
             </div>
           )}
            
           {/* Title */}
-          <h3 className="font-bold text-sm text-white line-clamp-2 leading-snug 
+          <h3 className="font-bold text-xs sm:text-sm text-white line-clamp-2 leading-snug 
             drop-shadow-lg
             group-hover:text-transparent group-hover:bg-clip-text 
             group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-blue-200
@@ -90,9 +90,9 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
           
           {/* Chapter Badge */}
           {manga.chapter && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-300 font-medium
+            <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-gray-300 font-medium
               opacity-80 group-hover:opacity-100 transition-opacity">
-              <BookOpen className="w-3 h-3" />
+              <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="truncate">{manga.chapter}</span>
             </div>
           )}
