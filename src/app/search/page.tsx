@@ -200,7 +200,7 @@ function SearchContent() {
           Pencarian Manga
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
-          Cari manga dari Komiku dan Kiryuu
+          Cari manga, manhwa, atau manhua favoritmu.
         </p>
       </div>
       
