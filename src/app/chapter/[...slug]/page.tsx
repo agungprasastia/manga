@@ -42,8 +42,30 @@ export default function ChapterReaderPage() {
   let prevChapterSlug = chapter?.prevChapter;
   let nextChapterSlug = chapter?.nextChapter;
 
+  // Debug: Log initial values from API
+  console.log('[Chapter Nav] API values:', { prevChapter: chapter?.prevChapter, nextChapter: chapter?.nextChapter, mangaSlug: chapter?.mangaSlug });
+  console.log('[Chapter Nav] Current slug:', slug);
+
   if (manga && manga.chapters.length > 0) {
-    const currentIndex = manga.chapters.findIndex(c => c.slug === slug);
+    // Try exact match first
+    let currentIndex = manga.chapters.findIndex(c => c.slug === slug);
+    
+    // If not found, try partial match (slug might have different prefix/suffix)
+    if (currentIndex === -1) {
+      currentIndex = manga.chapters.findIndex(c => 
+        slug.includes(c.slug) || c.slug.includes(slug) ||
+        slug.endsWith(c.slug.split('/').pop() || '') || 
+        c.slug.endsWith(slug.split('/').pop() || '')
+      );
+    }
+    
+    console.log('[Chapter Nav] Chapter list lookup:', { 
+      found: currentIndex !== -1, 
+      currentIndex, 
+      totalChapters: manga.chapters.length,
+      chapterSlugs: manga.chapters.slice(0, 5).map(c => c.slug) // First 5 for debugging
+    });
+
     if (currentIndex !== -1) {
       // Chapters are usually listed newest first (index 0) to oldest
       // So Next (newer) is index - 1, Prev (older) is index + 1
@@ -53,12 +75,19 @@ export default function ChapterReaderPage() {
       if (nextIndex >= 0) {
         nextChapterSlug = manga.chapters[nextIndex].slug;
       }
+      // Keep API value if at newest chapter (don't set to undefined)
       
       if (prevIndex < manga.chapters.length) {
         prevChapterSlug = manga.chapters[prevIndex].slug;
       }
+      // Keep API value if at oldest chapter (don't set to undefined)
+      
+      console.log('[Chapter Nav] Fallback navigation:', { prevChapterSlug, nextChapterSlug });
     }
   }
+  
+  // Final debug
+  console.log('[Chapter Nav] Final values:', { prevChapterSlug, nextChapterSlug });
 
   // Handle scroll progress
   useEffect(() => {
@@ -192,7 +221,7 @@ export default function ChapterReaderPage() {
 
       {/* Main Content (Images) */}
       <main 
-        className="container max-w-3xl py-0 pb-24 sm:pb-28 md:pb-32 min-h-screen cursor-pointer px-0"
+        className="container max-w-3xl py-0 pb-24 sm:pb-28 md:pb-32 min-h-screen px-0"
         onClick={() => setShowUI(!showUI)}
       >
         {chapter.images.length === 0 ? (
@@ -236,7 +265,7 @@ export default function ChapterReaderPage() {
                 if(prevChapterSlug) router.push(`/chapter/${prevChapterSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
               }}
               className="flex-1 h-10 sm:h-12 rounded-lg sm:rounded-xl bg-white/5 border-white/10 text-white 
-                hover:bg-white/10 hover:border-white/20
+                hover:bg-white/10 hover:border-white/20 cursor-pointer
                 disabled:opacity-30 disabled:cursor-not-allowed text-xs sm:text-sm"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-0.5 sm:mr-1" />
@@ -255,7 +284,7 @@ export default function ChapterReaderPage() {
                 e.stopPropagation();
                 if(nextChapterSlug) router.push(`/chapter/${nextChapterSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
               }}
-              className="flex-1 h-10 sm:h-12 rounded-lg sm:rounded-xl
+              className="flex-1 h-10 sm:h-12 rounded-lg sm:rounded-xl cursor-pointer
                 bg-gradient-to-r from-primary to-blue-500 
                 hover:from-primary/90 hover:to-blue-400
                 shadow-lg shadow-primary/20

@@ -314,10 +314,98 @@ export function Header() {
                  placeholder="Cari manga..."
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full bg-white/5 border-white/10 h-12 pl-12 rounded-xl
+                 className="w-full bg-white/5 border-white/10 h-12 pl-12 pr-12 rounded-xl
                    focus:border-primary/50 text-base placeholder:text-white/30 text-white"
                />
+               {searchQuery && (
+                 <button
+                   type="button"
+                   onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
+                   className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-white/50 hover:text-white 
+                     rounded-full hover:bg-white/10 transition-all"
+                 >
+                   <X className="w-4 h-4" />
+                 </button>
+               )}
              </form>
+
+             {/* Mobile Live Search Results */}
+             {showResults && (
+               <div className="mt-3 bg-card/95 backdrop-blur-xl border border-white/10 
+                 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+                 <div className="max-h-[50vh] overflow-y-auto">
+                   {isLoading ? (
+                     <div className="p-6 text-center">
+                       <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                       <span className="text-muted-foreground text-sm">Mencari...</span>
+                     </div>
+                   ) : results && results.length > 0 ? (
+                     <>
+                       {results.slice(0, 5).map((manga) => (
+                         <Link 
+                           key={manga.slug} 
+                           href={`/manga/${manga.slug}`}
+                           className="flex gap-3 p-3 hover:bg-white/5 transition-all duration-200
+                             border-b border-white/5 last:border-none group/item"
+                           onClick={() => { setShowResults(false); setIsMobileSearchOpen(false); }}
+                         >
+                           <div className="relative w-12 h-16 shrink-0 rounded-lg overflow-hidden 
+                             bg-muted shadow-lg group-hover/item:shadow-primary/20 transition-shadow">
+                             <Image 
+                               src={manga.cover} 
+                               alt={manga.title}
+                               fill
+                               className="object-cover group-hover/item:scale-105 transition-transform duration-300"
+                             />
+                           </div>
+                           <div className="flex-1 min-w-0 flex flex-col justify-center">
+                             <h4 className="font-semibold text-sm line-clamp-1 text-white 
+                               group-hover/item:text-primary transition-colors">
+                               {manga.title}
+                             </h4>
+                             <div className="flex items-center gap-2 mt-1">
+                               {manga.rating && (
+                                 <span className="text-xs text-yellow-400 font-medium 
+                                   flex items-center gap-1 bg-yellow-500/10 px-2 py-0.5 rounded-full">
+                                   ★ {manga.rating}
+                                 </span>
+                               )}
+                               {manga.type && (
+                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                   manga.type.toLowerCase() === 'manhwa' 
+                                     ? 'bg-orange-500/20 text-orange-400' 
+                                     : manga.type.toLowerCase() === 'manhua' 
+                                       ? 'bg-purple-500/20 text-purple-400' 
+                                       : 'bg-blue-500/20 text-blue-400'
+                                 }`}>
+                                   {manga.type}
+                                 </span>
+                               )}
+                             </div>
+                           </div>
+                         </Link>
+                       ))}
+                       <div className="p-3 bg-white/5">
+                         <Button 
+                           variant="ghost" 
+                           className="w-full text-sm h-10 text-white/70 hover:text-primary 
+                             hover:bg-primary/10 rounded-xl font-medium"
+                           onClick={(e) => { handleSearch(e); setIsMobileSearchOpen(false); }}
+                         >
+                           <Sparkles className="w-4 h-4 mr-2" />
+                           Lihat semua hasil
+                         </Button>
+                       </div>
+                     </>
+                   ) : (
+                     <div className="p-6 text-center">
+                       <Search className="w-8 h-8 text-white/20 mx-auto mb-3" />
+                       <p className="text-muted-foreground text-sm">Tidak ada hasil ditemukan</p>
+                     </div>
+                   )}
+                 </div>
+               </div>
+             )}
           </div>
         )}
 
