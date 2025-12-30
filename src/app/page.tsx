@@ -144,7 +144,13 @@ function HomeContent() {
                   </button>
 
                   <Link 
-                    href={`/chapter/${item.chapterSlug}${item.source ? `?source=${item.source}` : ''}${item.mangaCover ? `&cover=${encodeURIComponent(item.mangaCover)}` : ''}`}
+                    href={(() => {
+                      const params = new URLSearchParams();
+                      if (item.source) params.set('source', item.source);
+                      if (item.mangaCover) params.set('cover', item.mangaCover);
+                      const queryString = params.toString();
+                      return `/chapter/${item.chapterSlug}${queryString ? `?${queryString}` : ''}`;
+                    })()}
                     className="block"
                   >
                     <div className="relative aspect-[2/3] rounded-lg overflow-hidden 

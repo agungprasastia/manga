@@ -45,9 +45,7 @@ export default function ChapterReaderPage() {
   let prevChapterSlug = chapter?.prevChapter;
   let nextChapterSlug = chapter?.nextChapter;
 
-  // Debug: Log initial values from API
-  console.log('[Chapter Nav] API values:', { prevChapter: chapter?.prevChapter, nextChapter: chapter?.nextChapter, mangaSlug: chapter?.mangaSlug });
-  console.log('[Chapter Nav] Current slug:', slug);
+
 
   if (manga && manga.chapters.length > 0) {
     // Try exact match first
@@ -62,12 +60,7 @@ export default function ChapterReaderPage() {
       );
     }
     
-    console.log('[Chapter Nav] Chapter list lookup:', { 
-      found: currentIndex !== -1, 
-      currentIndex, 
-      totalChapters: manga.chapters.length,
-      chapterSlugs: manga.chapters.slice(0, 5).map(c => c.slug) // First 5 for debugging
-    });
+
 
     if (currentIndex !== -1) {
       // Chapters are usually listed newest first (index 0) to oldest
@@ -85,12 +78,20 @@ export default function ChapterReaderPage() {
       }
       // Keep API value if at oldest chapter (don't set to undefined)
       
-      console.log('[Chapter Nav] Fallback navigation:', { prevChapterSlug, nextChapterSlug });
+
     }
   }
   
-  // Final debug
-  console.log('[Chapter Nav] Final values:', { prevChapterSlug, nextChapterSlug });
+
+
+  // Helper function to build chapter URL with proper query string
+  const buildChapterUrl = useCallback((chapterSlug: string) => {
+    const params = new URLSearchParams();
+    if (source) params.set('source', source);
+    if (coverParam) params.set('cover', coverParam);
+    const queryString = params.toString();
+    return `/chapter/${chapterSlug}${queryString ? `?${queryString}` : ''}`;
+  }, [source, coverParam]);
 
   // Handle scroll progress and current page tracking
   useEffect(() => {
@@ -169,10 +170,10 @@ export default function ChapterReaderPage() {
     (e: KeyboardEvent) => {
       if (!chapter) return;
       if (e.key === 'ArrowLeft' && prevChapterSlug) {
-        router.push(`/chapter/${prevChapterSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
+        router.push(buildChapterUrl(prevChapterSlug));
       }
       else if (e.key === 'ArrowRight' && nextChapterSlug) {
-        router.push(`/chapter/${nextChapterSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
+        router.push(buildChapterUrl(nextChapterSlug));
       }
     },
     [chapter, router, source, coverParam, prevChapterSlug, nextChapterSlug]
@@ -247,7 +248,11 @@ export default function ChapterReaderPage() {
                 size="sm" 
                 onClick={() => {
                   if (chapter?.mangaSlug) {
-                    router.push(`/manga/${chapter.mangaSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
+                    const params = new URLSearchParams();
+                    if (source) params.set('source', source);
+                    if (coverParam) params.set('cover', coverParam);
+                    const queryString = params.toString();
+                    router.push(`/manga/${chapter.mangaSlug}${queryString ? `?${queryString}` : ''}`);
                   } else {
                     router.back();
                   }
@@ -326,7 +331,7 @@ export default function ChapterReaderPage() {
               disabled={!prevChapterSlug}
               onClick={(e) => {
                 e.stopPropagation();
-                if(prevChapterSlug) router.push(`/chapter/${prevChapterSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
+                if(prevChapterSlug) router.push(buildChapterUrl(prevChapterSlug));
               }}
               className="flex-1 h-10 sm:h-12 rounded-lg sm:rounded-xl bg-white/5 border-white/10 text-white 
                 hover:bg-white/10 hover:border-white/20 cursor-pointer
@@ -346,7 +351,7 @@ export default function ChapterReaderPage() {
               disabled={!nextChapterSlug}
               onClick={(e) => {
                 e.stopPropagation();
-                if(nextChapterSlug) router.push(`/chapter/${nextChapterSlug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`);
+                if(nextChapterSlug) router.push(buildChapterUrl(nextChapterSlug));
               }}
               className="flex-1 h-10 sm:h-12 rounded-lg sm:rounded-xl cursor-pointer
                 bg-gradient-to-r from-primary to-blue-500 

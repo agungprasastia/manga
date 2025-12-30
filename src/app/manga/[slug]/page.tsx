@@ -11,8 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Pen, MapPin, Star, BookOpen, Zap, Library, FileQuestion, Clock, Eye } from 'lucide-react';
+import { ArrowLeft, Pen, MapPin, Star, BookOpen, Zap, Library, FileQuestion, Clock, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useFadeIn } from '@/hooks/use-anime';
+import { useBookmarks, type BookmarkedManga } from '@/hooks/use-bookmarks';
 
 export default function MangaDetailPage() {
   const params = useParams();
@@ -36,6 +37,10 @@ export default function MangaDetailPage() {
 
   // Anime.js fade-in animation for cover (must be called before conditional returns)
   const coverRef = useFadeIn<HTMLDivElement>([mangaData], { from: 'scale', duration: 600 });
+
+  // Bookmark functionality
+  const { isBookmarked, toggle: toggleBookmark } = useBookmarks();
+  const bookmarked = manga ? isBookmarked(slug) : false;
 
   if (isLoading) {
     return (
@@ -81,6 +86,15 @@ export default function MangaDetailPage() {
 
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const lastChapter = manga.chapters[0];
+
+  // Helper function to build chapter URL with proper query string
+  const buildChapterUrl = (chapterSlug: string) => {
+    const params = new URLSearchParams();
+    if (source) params.set('source', source);
+    if (coverParam) params.set('cover', coverParam);
+    const queryString = params.toString();
+    return `/chapter/${chapterSlug}${queryString ? `?${queryString}` : ''}`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,7 +144,7 @@ export default function MangaDetailPage() {
             {/* Quick Actions */}
             <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
               {firstChapter && (
-                <Link href={`/chapter/${firstChapter.slug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`} className="block">
+                <Link href={buildChapterUrl(firstChapter.slug)} className="block">
                   <Button className="w-full h-10 sm:h-12 rounded-xl text-sm sm:text-base font-semibold
                     bg-gradient-to-r from-primary to-blue-500 
                     hover:shadow-lg hover:shadow-primary/30
@@ -140,7 +154,7 @@ export default function MangaDetailPage() {
                 </Link>
               )}
               {lastChapter && lastChapter !== firstChapter && (
-                <Link href={`/chapter/${lastChapter.slug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`} className="block">
+                <Link href={buildChapterUrl(lastChapter.slug)} className="block">
                   <Button variant="outline" className="w-full h-10 sm:h-12 rounded-xl text-sm sm:text-base font-semibold
                     border-white/20 bg-white/5 backdrop-blur-sm
                     hover:bg-white/10 hover:border-white/30
@@ -149,6 +163,38 @@ export default function MangaDetailPage() {
                   </Button>
                 </Link>
               )}
+              
+              {/* Bookmark Button */}
+              <Button 
+                variant="outline" 
+                className={`w-full h-10 sm:h-12 rounded-xl text-sm sm:text-base font-semibold
+                  border-white/20 backdrop-blur-sm transition-all ${
+                    bookmarked 
+                      ? 'bg-primary/20 border-primary/40 text-primary hover:bg-primary/30' 
+                      : 'bg-white/5 hover:bg-white/10 hover:border-white/30'
+                  }`}
+                size="lg"
+                onClick={() => {
+                  if (!manga) return;
+                  const bookmarkData: BookmarkedManga = {
+                    slug: slug,
+                    title: manga.title,
+                    cover: manga.cover,
+                    type: manga.type,
+                    rating: manga.rating,
+                    latestChapter: lastChapter?.title,
+                    source: source || undefined,
+                    addedAt: Date.now(),
+                  };
+                  toggleBookmark(bookmarkData);
+                }}
+              >
+                {bookmarked ? (
+                  <><BookmarkCheck className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> Tersimpan</>
+                ) : (
+                  <><Bookmark className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> Bookmark</>
+                )}
+              </Button>
             </div>
           </div>
 
@@ -243,7 +289,7 @@ export default function MangaDetailPage() {
                 {manga.chapters.map((chapter, index) => (
                   <Link
                     key={chapter.slug}
-                    href={`/chapter/${chapter.slug}${source ? `?source=${source}` : ''}${coverParam ? `&cover=${encodeURIComponent(coverParam)}` : ''}`}
+                    href={buildChapterUrl(chapter.slug)}
                     className="flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 
                       transition-all duration-200 group"
                   >

@@ -107,6 +107,13 @@ function SearchResults() {
     enabled: query.length > 0,
   });
 
+  // Anime.js stagger animation for search results - MUST be called unconditionally
+  const resultsRef = useStaggerAnimation<HTMLDivElement>(
+    '.search-result-item',
+    [isLoading, results?.length],
+    { staggerDelay: 40, delay: 100 }
+  );
+
   if (!query) {
     return (
       <div className="text-center py-12 sm:py-16 md:py-20 px-4">
@@ -159,13 +166,6 @@ function SearchResults() {
       </div>
     );
   }
-
-  // Anime.js stagger animation for search results
-  const resultsRef = useStaggerAnimation<HTMLDivElement>(
-    '.search-result-item',
-    [results?.length],
-    { staggerDelay: 40, delay: 100 }
-  );
 
   return (
     <>
