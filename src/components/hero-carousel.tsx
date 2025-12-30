@@ -4,15 +4,42 @@ import Autoplay from 'embla-carousel-autoplay';
 import useEmblaCarousel from 'embla-carousel-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, BookOpen, Star } from 'lucide-react';
 import type { Manga } from '@/lib/api';
+import { animate, stagger } from 'animejs';
 
 export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000 })]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Animate slide content when slide changes
+  const animateSlideContent = useCallback(() => {
+    if (!contentRef.current) return;
+    
+    const activeSlide = contentRef.current.querySelector(`[data-slide-index="${selectedIndex}"]`);
+    if (!activeSlide) return;
+
+    const animatableElements = activeSlide.querySelectorAll('.animate-on-slide');
+    if (animatableElements.length === 0) return;
+
+    // Reset and animate
+    animatableElements.forEach((el) => {
+      (el as HTMLElement).style.opacity = '0';
+      (el as HTMLElement).style.transform = 'translateY(20px)';
+    });
+
+    animate(animatableElements, {
+      translateY: [20, 0],
+      opacity: [0, 1],
+      delay: stagger(80, { start: 100 }),
+      duration: 600,
+      ease: 'outExpo'
+    });
+  }, [selectedIndex]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -24,6 +51,11 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
     onSelect();
     emblaApi.on('select', onSelect);
   }, [emblaApi, onSelect]);
+
+  // Trigger animation when selectedIndex changes
+  useEffect(() => {
+    animateSlideContent();
+  }, [selectedIndex, animateSlideContent]);
 
   const scrollTo = useCallback(
     (index: number) => emblaApi && emblaApi.scrollTo(index),
@@ -44,9 +76,9 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
       
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
+        <div className="flex" ref={contentRef}>
           {carouselItems.map((manga, index) => (
-            <div key={manga.slug} className="relative flex-[0_0_100%] min-w-0">
+            <div key={manga.slug} className="relative flex-[0_0_100%] min-w-0" data-slide-index={index}>
               {/* Aspect Ratio Container */}
               <div className="relative aspect-[4/5] md:aspect-[21/9] lg:aspect-[28/9] xl:aspect-[32/9] w-full overflow-hidden">
                 
@@ -94,12 +126,12 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
                     </div>
                     
                     {/* Badge */}
-                    <div className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
+                    <div className="animate-on-slide px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
                       Top Popular #{index + 1}
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-xl sm:text-2xl font-black text-white leading-tight line-clamp-2 px-2 drop-shadow-md">
+                    <h2 className="animate-on-slide text-xl sm:text-2xl font-black text-white leading-tight line-clamp-2 px-2 drop-shadow-md">
                       {manga.title}
                     </h2>
 

@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useStaggerAnimation } from '@/hooks/use-anime';
+import { useStaggerAnimation, useScrollReveal, useScrollRevealStagger } from '@/hooks/use-anime';
 
 function HomeContent() {
   // Fetch Home Data (Carousel + Popular + Latest Page 1)
@@ -84,6 +84,12 @@ function HomeContent() {
     [isInitialLoading, allLatestManga.length],
     { staggerDelay: 40, delay: 100 }
   );
+
+  // Scroll reveal animations
+  const sidebarRef = useScrollReveal<HTMLElement>({ from: 'right', delay: 200 });
+  const footerRef = useScrollReveal<HTMLElement>({ from: 'bottom', delay: 100, duration: 1000 });
+  const footerLinksRef = useScrollRevealStagger<HTMLDivElement>('.footer-link-item', { staggerDelay: 50, delay: 300 });
+  const genreRef = useScrollRevealStagger<HTMLDivElement>('.genre-badge', { staggerDelay: 30, delay: 200 });
 
   return (
     <div className="min-h-screen bg-background pb-12">
@@ -173,7 +179,7 @@ function HomeContent() {
           </div>
 
           {/* Sidebar - Enhanced */}
-          <aside className="w-full lg:w-80 shrink-0 space-y-6 lg:space-y-8 order-1 lg:order-2">
+          <aside ref={sidebarRef} className="w-full lg:w-80 shrink-0 space-y-6 lg:space-y-8 order-1 lg:order-2">
              {/* Mobile/Tablet: Horizontal Popular Section */}
              <div className="lg:hidden">
                <Card className="bg-card/50 border-white/10 overflow-hidden backdrop-blur-sm">
@@ -331,11 +337,11 @@ function HomeContent() {
                  <CardTitle className="text-lg font-bold bg-gradient-to-r from-white to-white/60 
                    bg-clip-text text-transparent">Genre</CardTitle>
                </CardHeader>
-               <CardContent className="pt-4">
+               <CardContent className="pt-4" ref={genreRef}>
                   <div className="flex flex-wrap gap-2">
                      {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Harem', 'Romance', 'Seinen', 'Shounen', 'Slice of Life'].map(g => (
                         <Badge key={g} variant="secondary" 
-                          className="bg-white/5 hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 
+                          className="genre-badge bg-white/5 hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 
                             border-white/10 hover:border-transparent
                             text-white/70 hover:text-white 
                             cursor-pointer transition-all duration-300 hover:-translate-y-0.5">
@@ -351,7 +357,7 @@ function HomeContent() {
       </main>
 
       {/* Footer - Premium Design */}
-      <footer className="relative border-t border-white/10 py-10 sm:py-12 md:py-16 mt-10 sm:mt-12 md:mt-16 overflow-hidden">
+      <footer ref={footerRef} className="relative border-t border-white/10 py-10 sm:py-12 md:py-16 mt-10 sm:mt-12 md:mt-16 overflow-hidden">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-card to-transparent" />
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
