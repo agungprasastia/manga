@@ -10,6 +10,7 @@ import { Header } from '@/components/header';
 import { MangaCard } from '@/components/manga-card';
 import { MangaGridSkeleton } from '@/components/manga-skeleton';
 import { HeroCarousel } from '@/components/hero-carousel';
+import { BackToTop } from '@/components/back-to-top';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,10 +98,10 @@ function HomeContent() {
   const { history, isLoaded: isHistoryLoaded, removeProgress } = useReadingHistory();
 
   return (
-    <div className="min-h-screen bg-background pb-12">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="container max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6 md:space-y-8 lg:space-y-10">
+      <main className="container max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6 md:space-y-8 lg:space-y-10 flex-1">
         
         {/* Hero Section */}
         <section className="-mx-3 sm:mx-0">
@@ -509,6 +510,9 @@ function HomeContent() {
           </div>
         </div>
       </footer>
+
+      {/* Back to Top Button */}
+      <BackToTop />
     </div>
   );
 }

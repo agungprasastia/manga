@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Pen, MapPin, Star, BookOpen, Zap, Library, FileQuestion, Clock, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useFadeIn } from '@/hooks/use-anime';
 import { useBookmarks, type BookmarkedManga } from '@/hooks/use-bookmarks';
+import { Breadcrumb } from '@/components/breadcrumb';
 
 export default function MangaDetailPage() {
   const params = useParams();
@@ -113,15 +114,8 @@ export default function MangaDetailPage() {
       </div>
 
       <main className="container max-w-6xl -mt-6 sm:-mt-8 md:-mt-12 relative z-10 pb-12 sm:pb-16 px-3 sm:px-4 md:px-6">
-        {/* Back Button */}
-        <Link href="/">
-          <Button 
-            variant="ghost" 
-            className="mb-4 sm:mb-6 text-white/70 hover:text-white hover:bg-white/10 rounded-full text-sm sm:text-base h-9 sm:h-10"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" /> <span className="hidden sm:inline">Kembali</span>
-          </Button>
-        </Link>
+        {/* Breadcrumb Navigation */}
+        <Breadcrumb items={[{ label: manga.title }]} />
 
         {/* Main Content */}
         <div className="flex flex-col md:flex-row gap-6 sm:gap-8 mb-8 sm:mb-10">
