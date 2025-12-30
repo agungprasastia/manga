@@ -4,10 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { getChapter, getMangaDetail } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Home, ChevronLeft, ChevronRight, BookOpen, Loader2, FileQuestion } from 'lucide-react';
+import { saveReadingProgress, type ReadingProgress } from '@/hooks/use-reading-progress';
 
 export default function ChapterReaderPage() {
   const params = useParams();
@@ -20,6 +21,8 @@ export default function ChapterReaderPage() {
   const slug = slugParts?.join('/') || '';
   const [showUI, setShowUI] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const imagesContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: chapterData, isLoading: isChapterLoading, error: chapterError } = useQuery({
     queryKey: ['chapter', slug, source],
@@ -89,16 +92,77 @@ export default function ChapterReaderPage() {
   // Final debug
   console.log('[Chapter Nav] Final values:', { prevChapterSlug, nextChapterSlug });
 
-  // Handle scroll progress
+  // Handle scroll progress and current page tracking
   useEffect(() => {
-    const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (window.scrollY / totalHeight) * 100;
-      setProgress(Math.min(100, Math.max(0, progress)));
+    let saveTimeout: NodeJS.Timeout;
+    
+    const calculateCurrentPage = () => {
+      if (!imagesContainerRef.current || !chapter?.images?.length) return 1;
+      
+      const images = imagesContainerRef.current.querySelectorAll('[data-page-index]');
+      const viewportMiddle = window.scrollY + window.innerHeight / 2;
+      
+      let currentPageIndex = 0;
+      images.forEach((img, index) => {
+        const rect = img.getBoundingClientRect();
+        const imgTop = window.scrollY + rect.top;
+        const imgBottom = imgTop + rect.height;
+        
+        if (viewportMiddle >= imgTop && viewportMiddle <= imgBottom) {
+          currentPageIndex = index;
+        }
+      });
+      
+      return currentPageIndex + 1;
     };
+
+    const saveProgress = () => {
+      if (!chapter || !manga) return;
+      
+      const progressData: ReadingProgress = {
+        mangaSlug: chapterData?.mangaSlug || slug.split('/')[1] || '',
+        mangaTitle: manga.title,
+        mangaCover: coverParam || manga.cover || '',
+        chapterSlug: slug,
+        chapterTitle: chapter.title,
+        currentPage: currentPage,
+        totalPages: chapter.images?.length || 0,
+        timestamp: Date.now(),
+        source: source || undefined,
+      };
+      
+      saveReadingProgress(progressData);
+    };
+    
+    const handleScroll = () => {
+      // Calculate progress percentage
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progressPercent = (window.scrollY / totalHeight) * 100;
+      setProgress(Math.min(100, Math.max(0, progressPercent)));
+      
+      // Calculate current page
+      const page = calculateCurrentPage();
+      setCurrentPage(page);
+      
+      // Debounced save to localStorage
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveProgress, 1000);
+    };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    
+    // Save on page unload
+    const handleBeforeUnload = () => {
+      saveProgress();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      clearTimeout(saveTimeout);
+    };
+  }, [chapter, manga, slug, source, coverParam, currentPage]);
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
@@ -232,9 +296,9 @@ export default function ChapterReaderPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-0 sm:space-y-0.5 md:space-y-1 shadow-2xl bg-black">
+          <div ref={imagesContainerRef} className="space-y-0 sm:space-y-0.5 md:space-y-1 shadow-2xl bg-black">
             {chapter.images.map((src, index) => (
-              <div key={index} className="relative w-full">
+              <div key={index} className="relative w-full" data-page-index={index}>
                 <Image
                   src={src}
                   alt={`Page ${index + 1}`}

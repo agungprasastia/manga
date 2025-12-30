@@ -2,7 +2,8 @@
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { Sparkles, Flame, Star, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { Sparkles, Flame, Star, Loader2, BookOpen, Clock, X } from 'lucide-react';
 import { Suspense, useMemo } from 'react';
 import { getHome, getLatest } from '@/lib/api';
 import { Header } from '@/components/header';
@@ -15,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useStaggerAnimation, useScrollReveal, useScrollRevealStagger } from '@/hooks/use-anime';
+import { useReadingHistory, formatRelativeTime } from '@/hooks/use-reading-progress';
 
 function HomeContent() {
   // Fetch Home Data (Carousel + Popular + Latest Page 1)
@@ -91,6 +93,9 @@ function HomeContent() {
   const footerLinksRef = useScrollRevealStagger<HTMLDivElement>('.footer-link-item', { staggerDelay: 50, delay: 300 });
   const genreRef = useScrollRevealStagger<HTMLDivElement>('.genre-badge', { staggerDelay: 30, delay: 200 });
 
+  // Reading history
+  const { history, isLoaded: isHistoryLoaded, removeProgress } = useReadingHistory();
+
   return (
     <div className="min-h-screen bg-background pb-12">
       <Header />
@@ -104,6 +109,98 @@ function HomeContent() {
           )}
           {homeQuery.isLoading && <Skeleton className="w-full aspect-[5/6] md:aspect-[21/9] lg:aspect-[28/9] xl:aspect-[32/9] rounded-xl" />}
         </section>
+
+        {/* Continue Reading Section */}
+        {isHistoryLoaded && history.length > 0 && (
+          <section className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-2 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg
+                  backdrop-blur-sm border border-green-500/20 shadow-lg shadow-green-500/10">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Lanjutkan Membaca</h2>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Manga terakhir yang kamu baca</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
+              {history.slice(0, 5).map((item) => (
+                <div key={item.mangaSlug} className="shrink-0 w-36 sm:w-44 group relative">
+                  {/* Remove Button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      removeProgress(item.mangaSlug);
+                    }}
+                    className="absolute top-1.5 right-1.5 z-20 w-6 h-6 rounded-full bg-black/60 backdrop-blur-sm
+                      flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity
+                      hover:bg-red-500/80 text-white/70 hover:text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+
+                  <Link 
+                    href={`/chapter/${item.chapterSlug}${item.source ? `?source=${item.source}` : ''}${item.mangaCover ? `&cover=${encodeURIComponent(item.mangaCover)}` : ''}`}
+                    className="block"
+                  >
+                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden 
+                      shadow-lg group-hover:shadow-xl group-hover:shadow-green-500/20 
+                      transition-all duration-300 group-hover:-translate-y-1">
+                      
+                      {/* Cover Image */}
+                      <Image
+                        src={item.mangaCover || '/placeholder.jpg'}
+                        alt={item.mangaTitle}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      
+                      {/* Dark Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                      
+                      {/* Progress Bar */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all"
+                          style={{ width: `${Math.round((item.currentPage / item.totalPages) * 100)}%` }}
+                        />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                        <p className="text-[10px] text-green-400 font-medium mb-0.5">
+                          Hal {item.currentPage}/{item.totalPages}
+                        </p>
+                        <p className="text-[9px] text-white/50 flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" />
+                          {formatRelativeTime(item.timestamp)}
+                        </p>
+                      </div>
+                      
+                      {/* Resume Badge */}
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full 
+                        bg-green-500/90 text-white text-[9px] font-bold flex items-center gap-1">
+                        <BookOpen className="w-2.5 h-2.5" />
+                        Lanjutkan
+                      </div>
+                    </div>
+                    
+                    <h4 className="font-medium text-xs line-clamp-2 mt-2 text-white/80 group-hover:text-green-400 transition-colors">
+                      {item.mangaTitle}
+                    </h4>
+                    <p className="text-[10px] text-white/40 line-clamp-1 mt-0.5">
+                      {item.chapterTitle}
+                    </p>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <Separator className="my-2 bg-white/10" />
 
