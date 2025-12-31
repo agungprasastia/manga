@@ -39,7 +39,10 @@ function HomeContent() {
       return { data, page: pageParam };
     },
     getNextPageParam: (lastPage) => {
-      // Always allow next page (infinite scroll)
+      // If last page returned empty or less than expected, no more pages
+      if (!lastPage.data || lastPage.data.length === 0) {
+        return undefined; // No more pages
+      }
       return lastPage.page + 1;
     },
     initialPageParam: 1,
@@ -251,33 +254,41 @@ function HomeContent() {
 
                   {/* Load More Button - Gradient Style */}
                   <div className="flex justify-center mt-10 sm:mt-12 md:mt-16">
-                    <Button 
-                      size="lg"
-                      onClick={() => latestInfiniteQuery.fetchNextPage()}
-                      disabled={latestInfiniteQuery.isFetchingNextPage}
-                      className="min-w-[200px] sm:min-w-[240px] h-12 sm:h-14 rounded-full
-                        bg-gradient-to-r from-primary via-blue-500 to-primary
-                        bg-[length:200%_100%] animate-gradient
-                        hover:shadow-lg hover:shadow-primary/30
-                        hover:-translate-y-1
-                        transition-all duration-300
-                        text-white font-semibold text-sm sm:text-base
-                        border-none px-6 sm:px-8"
-                    >
-                      {latestInfiniteQuery.isFetchingNextPage ? (
-                        <>
-                          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
-                          <span className="hidden sm:inline">Memuat...</span>
-                          <span className="sm:hidden">Memuat</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                          <span className="hidden sm:inline">Muat Lebih Banyak</span>
-                          <span className="sm:hidden">Muat Lagi</span>
-                        </>
-                      )}
-                    </Button>
+                    {latestInfiniteQuery.hasNextPage !== false ? (
+                      <Button 
+                        size="lg"
+                        onClick={() => latestInfiniteQuery.fetchNextPage()}
+                        disabled={latestInfiniteQuery.isFetchingNextPage}
+                        className="min-w-[200px] sm:min-w-[240px] h-12 sm:h-14 rounded-full
+                          bg-gradient-to-r from-primary via-blue-500 to-primary
+                          bg-[length:200%_100%] animate-gradient
+                          hover:shadow-lg hover:shadow-primary/30
+                          hover:-translate-y-1
+                          transition-all duration-300
+                          text-white font-semibold text-sm sm:text-base
+                          border-none px-6 sm:px-8"
+                      >
+                        {latestInfiniteQuery.isFetchingNextPage ? (
+                          <>
+                            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+                            <span className="hidden sm:inline">Memuat...</span>
+                            <span className="sm:hidden">Memuat</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                            <span className="hidden sm:inline">Muat Lebih Banyak</span>
+                            <span className="sm:hidden">Muat Lagi</span>
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                        <span className="text-sm">Semua manga sudah ditampilkan ✨</span>
+                        <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      </div>
+                    )}
                   </div>
                 </>
              )}
