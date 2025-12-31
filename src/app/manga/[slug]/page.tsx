@@ -49,8 +49,16 @@ export default function MangaDetailPage() {
 
   // 18+ content warning state
   const [showAdultWarning, setShowAdultWarning] = useState(false);
-  const [adultWarningAccepted, setAdultWarningAccepted] = useState(false);
   const router = useRouter();
+
+  // Check if user already accepted warning for this manga (persists during session)
+  const sessionKey = `adult-accepted-${slug}`;
+  const [adultWarningAccepted, setAdultWarningAccepted] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem(sessionKey) === 'true';
+    }
+    return false;
+  });
 
   // Check if manga contains adult content
   const isAdultContent = manga?.genres?.some(genre => 
@@ -165,6 +173,7 @@ export default function MangaDetailPage() {
                 <Button 
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white"
                   onClick={() => {
+                    sessionStorage.setItem(sessionKey, 'true');
                     setAdultWarningAccepted(true);
                     setShowAdultWarning(false);
                   }}
