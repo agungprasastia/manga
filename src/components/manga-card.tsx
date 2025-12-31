@@ -98,6 +98,9 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
               opacity-80 group-hover:opacity-100 transition-opacity">
               <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="truncate">{manga.chapter}</span>
+              {manga.updatedAt && (
+                <span className="text-gray-400 ml-1">• {manga.updatedAt}</span>
+              )}
             </div>
           )}
         </div>

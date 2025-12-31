@@ -15,6 +15,7 @@ export interface Manga {
     chapter?: string;
     rating?: string;
     source?: 'komiku' | 'kiryuu';
+    updatedAt?: string;  // Relative time like "5 menit lalu", "2 jam lalu"
 }
 
 export interface Chapter {
