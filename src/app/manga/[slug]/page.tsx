@@ -77,13 +77,79 @@ export default function MangaDetailPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container max-w-6xl py-8">
-          <div className="flex flex-col md:flex-row gap-8">
-            <Skeleton className="w-full md:w-72 aspect-[2/3] rounded-2xl" />
+        
+        {/* Hero Background Skeleton */}
+        <div className="h-[60px] md:h-[80px] bg-muted/20" />
+        
+        <main className="container max-w-6xl -mt-6 sm:-mt-8 md:-mt-12 relative z-10 pb-12 sm:pb-16 px-3 sm:px-4 md:px-6">
+          {/* Breadcrumb Skeleton */}
+          <div className="flex items-center gap-2 py-4 mb-4">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-6 sm:gap-8 mb-8 sm:mb-10">
+            {/* Cover Skeleton */}
+            <div className="w-40 sm:w-48 md:w-72 shrink-0 mx-auto md:mx-0 space-y-4">
+              <Skeleton className="w-full aspect-[2/3] rounded-xl" />
+              <Skeleton className="w-full h-12 rounded-xl" />
+              <Skeleton className="w-full h-12 rounded-xl" />
+              <Skeleton className="w-full h-12 rounded-xl" />
+            </div>
+            
+            {/* Info Skeleton */}
             <div className="flex-1 space-y-4">
+              {/* Type Badge */}
+              <Skeleton className="h-6 w-20 rounded-full" />
+              
+              {/* Title */}
               <Skeleton className="h-10 w-3/4" />
               <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="h-32 w-full" />
+              
+              {/* Meta Info */}
+              <div className="flex gap-3">
+                <Skeleton className="h-8 w-28 rounded-full" />
+                <Skeleton className="h-8 w-24 rounded-full" />
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </div>
+              
+              {/* Genres */}
+              <div className="flex flex-wrap gap-2">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <Skeleton key={i} className="h-6 w-16 rounded-full" />
+                ))}
+              </div>
+              
+              {/* Synopsis */}
+              <div className="bg-white/5 rounded-2xl p-6 space-y-3">
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Chapter List Skeleton */}
+          <div className="bg-card border border-white/10 rounded-lg overflow-hidden">
+            <div className="p-4 sm:p-6 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-6 w-20 ml-auto rounded-full" />
+              </div>
+            </div>
+            <div className="space-y-0 divide-y divide-white/5">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                <div key={i} className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                    <Skeleton className="h-4 w-32 sm:w-48" />
+                  </div>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              ))}
             </div>
           </div>
         </main>
