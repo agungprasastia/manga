@@ -136,19 +136,25 @@ function HomeContent() {
               </div>
             </div>
 
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
+            <div className="relative">
+              {/* Fade gradient indicators */}
+              <div className="absolute left-0 top-0 bottom-2 w-6 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-2 w-6 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
               {history.slice(0, 5).map((item) => (
                 <div key={item.mangaSlug} className="shrink-0 w-36 sm:w-44 group relative">
-                  {/* Remove Button */}
+                  {/* Remove Button - Improved touch target */}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       removeProgress(item.mangaSlug);
                     }}
-                    className="absolute top-1.5 right-1.5 z-20 w-6 h-6 rounded-full bg-black/60 backdrop-blur-sm
+                    className="absolute top-1.5 right-1.5 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm
                       flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity
                       hover:bg-red-500/80 text-white/70 hover:text-white"
+                    aria-label={`Hapus ${item.mangaTitle} dari riwayat`}
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -214,6 +220,7 @@ function HomeContent() {
                   </Link>
                 </div>
               ))}
+            </div>
             </div>
           </section>
         )}
@@ -506,17 +513,17 @@ function HomeContent() {
                <h3 className="font-bold text-white text-base sm:text-lg">Navigasi</h3>
                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                  <li><Link href="/" className="text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
-                 <li><Link href="/popular" className="text-muted-foreground hover:text-primary transition-colors">Populer</Link></li>
                  <li><Link href="/bookmarks" className="text-muted-foreground hover:text-primary transition-colors">Bookmark</Link></li>
+                 <li><Link href="/search" className="text-muted-foreground hover:text-primary transition-colors">Pencarian</Link></li>
                </ul>
             </div>
 
             <div className="space-y-3 sm:space-y-4">
                <h3 className="font-bold text-white text-base sm:text-lg">Legal</h3>
                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                 <li><Link href="/dmca" className="text-muted-foreground hover:text-primary transition-colors">DMCA</Link></li>
-                 <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
-                 <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
+                 <li><span className="text-muted-foreground/50 cursor-not-allowed">DMCA</span></li>
+                 <li><span className="text-muted-foreground/50 cursor-not-allowed">Privacy Policy</span></li>
+                 <li><span className="text-muted-foreground/50 cursor-not-allowed">Terms of Service</span></li>
                </ul>
             </div>
           </div>

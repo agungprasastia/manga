@@ -21,6 +21,7 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
     <Link 
       href={href} 
       className="block group"
+      title={manga.title}
     >
       <div className="relative aspect-[3/4.5] overflow-hidden rounded-lg sm:rounded-xl bg-muted/50 
         shadow-lg shadow-black/20

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { getChapter, getMangaDetail } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Home, ChevronLeft, ChevronRight, BookOpen, Loader2, FileQuestion } from 'lucide-react';
+import { ArrowLeft, Home, ChevronLeft, ChevronRight, BookOpen, Loader2, FileQuestion, ChevronDown, X } from 'lucide-react';
 import { saveReadingProgress, type ReadingProgress } from '@/hooks/use-reading-progress';
 
 export default function ChapterReaderPage() {
@@ -20,6 +20,7 @@ export default function ChapterReaderPage() {
   const slugParts = params.slug as string[];
   const slug = slugParts?.join('/') || '';
   const [showUI, setShowUI] = useState(true);
+  const [showChapterList, setShowChapterList] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
@@ -265,14 +266,21 @@ export default function ChapterReaderPage() {
             </div>
 
             <div className="flex-1 text-center min-w-0 px-2">
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowChapterList(!showChapterList);
+                }}
+                className="flex items-center justify-center gap-1.5 sm:gap-2 mx-auto hover:bg-white/10 rounded-lg px-2 py-1 transition-colors"
+              >
                 <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
-                <h1 className="text-xs sm:text-sm font-medium truncate text-white/90">
+                <h1 className="text-xs sm:text-sm font-medium truncate text-white/90 max-w-[120px] sm:max-w-[200px]">
                   {chapter.title}
                 </h1>
-              </div>
-              <p className="text-[10px] sm:text-xs text-white/40 truncate hidden sm:block mt-0.5">
-                {progress < 100 ? `${Math.round(progress)}% Selesai` : '✓ Selesai'}
+                <ChevronDown className={`w-3.5 h-3.5 text-white/50 transition-transform ${showChapterList ? 'rotate-180' : ''}`} />
+              </button>
+              <p className="text-[10px] sm:text-xs text-white/60 mt-0.5">
+                Hal {currentPage}/{chapter.images?.length || 0} • {progress < 100 ? `${Math.round(progress)}%` : '✓'}
               </p>
             </div>
 
@@ -287,6 +295,54 @@ export default function ChapterReaderPage() {
           </div>
         </div>
       </header>
+
+      {/* Chapter List Dropdown */}
+      {showChapterList && manga && (
+        <div 
+          className={`fixed top-14 sm:top-16 left-0 right-0 z-40 transition-all duration-300
+            ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-black/95 backdrop-blur-xl border-b border-white/10 shadow-2xl max-h-[50vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-3 border-b border-white/10">
+              <span className="text-sm font-medium text-white">Daftar Chapter ({manga.chapters.length})</span>
+              <button 
+                onClick={() => setShowChapterList(false)}
+                className="p-1 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 text-white/60" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1">
+              {manga.chapters.map((ch, index) => {
+                const isCurrentChapter = ch.slug === slug || slug.includes(ch.slug) || ch.slug.includes(slug);
+                return (
+                  <button
+                    key={ch.slug}
+                    onClick={() => {
+                      setShowChapterList(false);
+                      router.push(buildChapterUrl(ch.slug));
+                    }}
+                    className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-colors border-b border-white/5
+                      ${isCurrentChapter ? 'bg-primary/20 text-primary' : 'hover:bg-white/5 text-white/70 hover:text-white'}`}
+                  >
+                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0
+                      ${isCurrentChapter ? 'bg-primary text-white' : 'bg-white/10 text-white/50'}`}>
+                      {manga.chapters.length - index}
+                    </span>
+                    <span className="text-sm truncate">{ch.title}</span>
+                    {isCurrentChapter && (
+                      <span className="ml-auto text-[10px] bg-primary/30 text-primary px-2 py-0.5 rounded-full shrink-0">
+                        Sedang dibaca
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content (Images) */}
       <main 

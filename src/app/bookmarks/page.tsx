@@ -7,6 +7,7 @@ import { Bookmark, Home, Trash2, BookmarkX } from 'lucide-react';
 import Link from 'next/link';
 import { useBookmarks } from '@/hooks/use-bookmarks';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export default function BookmarksPage() {
   const { bookmarks, isLoaded, remove } = useBookmarks();
@@ -73,11 +74,12 @@ export default function BookmarksPage() {
                     e.preventDefault();
                     e.stopPropagation();
                     remove(manga.slug);
+                    toast.success(`"${manga.title}" dihapus dari bookmark`, { duration: 2000 });
                   }}
-                  className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm
+                  className="absolute top-2 right-2 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm
                     flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity
                     hover:bg-red-500/80 text-white/70 hover:text-white"
-                  title="Hapus dari bookmark"
+                  aria-label={`Hapus ${manga.title} dari bookmark`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

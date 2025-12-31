@@ -7,6 +7,7 @@ import { searchManga } from '@/lib/api';
 import { Header } from '@/components/header';
 import { MangaCard } from '@/components/manga-card';
 import { MangaGridSkeleton } from '@/components/manga-skeleton';
+import { Breadcrumb } from '@/components/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Sparkles, X, Loader2 } from 'lucide-react';
@@ -193,6 +194,12 @@ function SearchContent() {
   
   return (
     <main className="container max-w-7xl py-8 sm:py-10 md:py-12 px-3 sm:px-4 md:px-6">
+      {/* Breadcrumb */}
+      <Breadcrumb items={[
+        { label: 'Pencarian', href: '/search' },
+        ...(query ? [{ label: query }] : [])
+      ]} />
+
       {/* Header */}
       <div className="text-center mb-6 sm:mb-8 md:mb-10">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 

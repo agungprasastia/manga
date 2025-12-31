@@ -12,7 +12,8 @@ import type { Manga } from '@/lib/api';
 import { animate, stagger } from 'animejs';
 
 export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000 })]);
+  const autoplayRef = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [autoplayRef.current]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +70,10 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
     <div className="relative overflow-hidden rounded-xl md:rounded-2xl 
       border border-white/10 
       shadow-2xl shadow-black/50
-      bg-gradient-to-br from-card/50 to-card">
+      bg-gradient-to-br from-card/50 to-card"
+      onMouseEnter={() => autoplayRef.current.stop()}
+      onMouseLeave={() => autoplayRef.current.play()}
+    >
       
       {/* Decorative corner glows */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
@@ -86,7 +90,7 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
                 <div className="absolute inset-0 overflow-hidden md:hidden">
                   <Image
                     src={manga.cover}
-                    alt="background"
+                    alt={`Background blur for ${manga.title}`}
                     fill
                     className="object-cover scale-[400%] blur-3xl saturate-100 opacity-60"
                   />
@@ -229,7 +233,8 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
         {carouselItems.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 md:w-2.5 md:h-2.5 rounded-full transition-all duration-300 ${
+            className={`w-3 h-3 md:w-2.5 md:h-2.5 rounded-full transition-all duration-300 
+              focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black/50 ${
               index === selectedIndex 
                 ? 'w-6 md:w-8 bg-gradient-to-r from-primary to-blue-400 shadow-lg shadow-primary/50' 
                 : 'bg-white/40 hover:bg-white/60'

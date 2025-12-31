@@ -16,6 +16,7 @@ import { ArrowLeft, Pen, MapPin, Star, BookOpen, Zap, Library, FileQuestion, Clo
 import { useFadeIn } from '@/hooks/use-anime';
 import { useBookmarks, type BookmarkedManga } from '@/hooks/use-bookmarks';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { toast } from 'sonner';
 
 // 18+ content genres to check for
 const ADULT_GENRES = ['adult', 'mature', 'ecchi', 'smut', 'hentai', '18+', 'gore', 'erotica'];
@@ -266,6 +267,11 @@ export default function MangaDetailPage() {
                     addedAt: Date.now(),
                   };
                   toggleBookmark(bookmarkData);
+                  if (bookmarked) {
+                    toast.success('Dihapus dari bookmark', { duration: 2000 });
+                  } else {
+                    toast.success('Ditambahkan ke bookmark', { duration: 2000 });
+                  }
                 }}
               >
                 {bookmarked ? (
@@ -323,15 +329,18 @@ export default function MangaDetailPage() {
               )}
             </div>
 
-            {/* Genres */}
+            {/* Genres - Clickable to search */}
             {manga.genres.length > 0 && (
               <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-6 sm:mb-8">
                 {manga.genres.map((genre) => (
-                  <Badge key={genre} 
-                    className="bg-white/5 hover:bg-primary/20 text-white/70 hover:text-white
-                      border-white/10 cursor-pointer transition-all text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1">
-                    {genre}
-                  </Badge>
+                  <Link key={genre} href={`/search?q=${encodeURIComponent(genre)}`}>
+                    <Badge
+                      className="bg-white/5 hover:bg-primary/20 text-white/70 hover:text-white
+                        border-white/10 cursor-pointer transition-all text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1"
+                    >
+                      {genre}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             )}
@@ -342,7 +351,7 @@ export default function MangaDetailPage() {
                 <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Sinopsis
               </h3>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm sm:text-base">
+              <p className="text-white/70 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                 {manga.synopsis || 'Tidak ada sinopsis tersedia untuk manga ini.'}
               </p>
             </div>
