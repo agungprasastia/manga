@@ -343,7 +343,7 @@ export default function ChapterReaderPage() {
             </Button>
 
             <div className="text-[9px] sm:text-[10px] text-center text-white/30 px-1 sm:px-2 hidden md:block w-32 sm:w-48">
-              Tap tengah layar untuk toggle menu<br className="hidden lg:block"/>
+              Gunakan ← → untuk navigasi<br className="hidden lg:block"/>
               <span className="lg:hidden">Tap untuk toggle</span>
             </div>
 

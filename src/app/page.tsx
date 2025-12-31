@@ -444,13 +444,15 @@ function HomeContent() {
                <CardContent className="pt-4" ref={genreRef}>
                   <div className="flex flex-wrap gap-2">
                      {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Harem', 'Romance', 'Seinen', 'Shounen', 'Slice of Life'].map(g => (
-                        <Badge key={g} variant="secondary" 
-                          className="genre-badge bg-white/5 hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 
-                            border-white/10 hover:border-transparent
-                            text-white/70 hover:text-white 
-                            cursor-pointer transition-all duration-300 hover:-translate-y-0.5">
-                           {g}
-                        </Badge>
+                        <Link key={g} href={`/search?q=${encodeURIComponent(g)}`}>
+                          <Badge variant="secondary" 
+                            className="genre-badge bg-white/5 hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 
+                              border-white/10 hover:border-transparent
+                              text-white/70 hover:text-white 
+                              cursor-pointer transition-all duration-300 hover:-translate-y-0.5">
+                             {g}
+                          </Badge>
+                        </Link>
                      ))}
                   </div>
                </CardContent>
@@ -461,7 +463,7 @@ function HomeContent() {
       </main>
 
       {/* Footer - Premium Design */}
-      <footer ref={footerRef} className="relative border-t border-white/10 py-10 sm:py-12 md:py-16 mt-10 sm:mt-12 md:mt-16 overflow-hidden">
+      <footer ref={footerRef} className="relative border-t border-white/10 py-10 sm:py-12 md:py-16 pb-20 sm:pb-24 mt-10 sm:mt-12 md:mt-16 overflow-hidden">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-card to-transparent" />
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />

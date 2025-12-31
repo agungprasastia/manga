@@ -38,6 +38,10 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
           className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           priority={priority}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.jpg';
+          }}
         />
 
         {/* Gradient Overlay - Enhanced */}
