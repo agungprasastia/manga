@@ -14,8 +14,9 @@ export interface Manga {
     type?: string;
     chapter?: string;
     rating?: string;
-    source?: 'komiku' | 'kiryuu';
+    source?: 'komiku' | 'softkomik';
     updatedAt?: string;  // Relative time like "5 menit lalu", "2 jam lalu"
+    updatedTimestamp?: string; // ISO timestamp for realtime calculation
 }
 
 export interface Chapter {
@@ -35,7 +36,7 @@ export interface MangaDetail {
     genres: string[];
     rating?: string;
     chapters: Chapter[];
-    source?: 'komiku' | 'kiryuu';
+    source?: 'komiku' | 'softkomik';
 }
 
 export interface ChapterImages {
