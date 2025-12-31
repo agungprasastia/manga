@@ -20,7 +20,7 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
   return (
     <Link 
       href={href} 
-      className="block group"
+      className="block group tap-transparent touch-manipulation active:scale-[0.98] transition-transform"
       title={manga.title}
     >
       <div className="relative aspect-[3/4.5] overflow-hidden rounded-lg sm:rounded-xl bg-muted/50 

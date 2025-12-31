@@ -4,6 +4,7 @@ import './globals.css';
 import { Providers } from '@/lib/providers';
 import { Toaster } from 'sonner';
 import { TopLoader } from '@/components/top-loader';
+import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -31,6 +32,7 @@ export default function RootLayout({
             <TopLoader />
           </Suspense>
           {children}
+          <MobileBottomNav />
         </Providers>
         <Toaster 
           theme="dark" 

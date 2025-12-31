@@ -353,4 +353,34 @@
   .animate-on-load {
     opacity: 0;
   }
+
+  /* Mobile Touch Improvements */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Tap highlight removal for cleaner touch */
+  .tap-transparent {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Active state for touch devices */
+  .touch-active:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+
+  /* Safe area padding for notched devices */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Smooth momentum scrolling on iOS */
+  .scroll-smooth-ios {
+    -webkit-overflow-scrolling: touch;
+  }
 }
