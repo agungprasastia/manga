@@ -48,30 +48,12 @@ function HomeContent() {
   // Determine what data to show
   const popularManga = homeQuery.data?.popular;
   
-  // Helper to parse updatedAt to minutes for sorting
-  const parseUpdatedAtToMinutes = (updatedAt: string | undefined): number => {
-    if (!updatedAt) return Infinity;
-    const text = updatedAt.toLowerCase();
-    const match = text.match(/(\d+)\s*(menit|jam|hari|minggu|bulan)/);
-    if (!match) return Infinity;
-    const value = parseInt(match[1]);
-    const unit = match[2];
-    switch (unit) {
-      case 'menit': return value;
-      case 'jam': return value * 60;
-      case 'hari': return value * 60 * 24;
-      case 'minggu': return value * 60 * 24 * 7;
-      case 'bulan': return value * 60 * 24 * 30;
-      default: return Infinity;
-    }
-  };
-  
-  // Combine home page data + infinite query pages, deduplicate, then SORT BY TIME
+  // Combine home page data + infinite query pages, deduplicate (NO frontend sorting - backend handles it)
   const allLatestManga = useMemo(() => {
     const seen = new Set<string>();
     const result: any[] = [];
     
-    // First, add page 1 data from homeQuery
+    // First, add page 1 data from homeQuery (already sorted by backend)
     if (homeQuery.data?.latest) {
       homeQuery.data.latest.forEach((manga: any) => {
         if (!seen.has(manga.slug)) {
@@ -81,7 +63,7 @@ function HomeContent() {
       });
     }
     
-    // Then add data from infinite query pages
+    // Then APPEND data from infinite query pages (backend already sorted each page)
     if (latestInfiniteQuery.data?.pages) {
       latestInfiniteQuery.data.pages.forEach((page) => {
         page.data.forEach((manga: any) => {
@@ -93,12 +75,8 @@ function HomeContent() {
       });
     }
     
-    // Sort ALL manga by update time (newest first) - continuous across all pages
-    return result.sort((a, b) => {
-      const timeA = parseUpdatedAtToMinutes(a.updatedAt);
-      const timeB = parseUpdatedAtToMinutes(b.updatedAt);
-      return timeA - timeB;
-    });
+    // NO sorting here - just return as-is to maintain continuous order
+    return result;
   }, [homeQuery.data?.latest, latestInfiniteQuery.data?.pages]);
 
   const isInitialLoading = homeQuery.isLoading;
