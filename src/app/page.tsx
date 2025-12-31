@@ -39,7 +39,12 @@ function HomeContent() {
       return { data, page: pageParam };
     },
     getNextPageParam: (lastPage) => {
-      // If last page returned empty or less than expected, no more pages
+      // Page 1 is special - it returns empty because data comes from homeQuery
+      // Always allow page 2 from page 1
+      if (lastPage.page === 1) {
+        return 2;
+      }
+      // For page 2+, check if data is empty (no more pages)
       if (!lastPage.data || lastPage.data.length === 0) {
         return undefined; // No more pages
       }
