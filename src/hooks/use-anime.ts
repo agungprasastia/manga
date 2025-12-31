@@ -6,6 +6,7 @@ import { animate, stagger } from 'animejs';
 /**
  * Hook untuk animasi stagger pada list of elements
  * Menggunakan anime.js v4 dengan API: animate(targets, properties)
+ * FIXED: Only animates NEW elements, doesn't re-animate existing ones
  */
 export function useStaggerAnimation<T extends HTMLElement = HTMLDivElement>(
     selector: string,
@@ -18,35 +19,33 @@ export function useStaggerAnimation<T extends HTMLElement = HTMLDivElement>(
     }
 ) {
     const containerRef = useRef<T>(null);
-    const hasAnimated = useRef(false);
+    const animatedCountRef = useRef(0); // Track how many items have been animated
 
     useEffect(() => {
-        // Reset animation flag when dependencies change (new data)
-        if (dependencies.some(dep => dep)) {
-            hasAnimated.current = false;
-        }
-    }, dependencies);
-
-    useEffect(() => {
-        if (hasAnimated.current || !containerRef.current) return;
+        if (!containerRef.current) return;
 
         const elements = containerRef.current.querySelectorAll(selector);
         if (elements.length === 0) return;
 
-        hasAnimated.current = true;
+        // Only animate elements that haven't been animated yet
+        const newElements = Array.from(elements).slice(animatedCountRef.current);
+        if (newElements.length === 0) return;
+
+        // Update count of animated elements
+        animatedCountRef.current = elements.length;
 
         const direction = options?.from || 'bottom';
         const translateProp = direction === 'left' || direction === 'right' ? 'translateX' : 'translateY';
         const translateStart = direction === 'left' ? -40 : direction === 'right' ? 40 : direction === 'top' ? -40 : 40;
 
-        // Set initial state
-        elements.forEach((el) => {
+        // Set initial state for NEW elements only
+        newElements.forEach((el) => {
             (el as HTMLElement).style.opacity = '0';
             (el as HTMLElement).style.transform = `${translateProp === 'translateX' ? 'translateX' : 'translateY'}(${translateStart}px)`;
         });
 
         // Animate with stagger
-        animate(elements, {
+        animate(newElements, {
             [translateProp]: [translateStart, 0],
             opacity: [0, 1],
             delay: stagger(options?.staggerDelay || 50, { start: options?.delay || 100 }),
