@@ -48,7 +48,25 @@ function HomeContent() {
   // Determine what data to show
   const popularManga = homeQuery.data?.popular;
   
-  // Combine home page data + infinite query pages, then deduplicate
+  // Helper to parse updatedAt to minutes for sorting
+  const parseUpdatedAtToMinutes = (updatedAt: string | undefined): number => {
+    if (!updatedAt) return Infinity;
+    const text = updatedAt.toLowerCase();
+    const match = text.match(/(\d+)\s*(menit|jam|hari|minggu|bulan)/);
+    if (!match) return Infinity;
+    const value = parseInt(match[1]);
+    const unit = match[2];
+    switch (unit) {
+      case 'menit': return value;
+      case 'jam': return value * 60;
+      case 'hari': return value * 60 * 24;
+      case 'minggu': return value * 60 * 24 * 7;
+      case 'bulan': return value * 60 * 24 * 30;
+      default: return Infinity;
+    }
+  };
+  
+  // Combine home page data + infinite query pages, deduplicate, then SORT BY TIME
   const allLatestManga = useMemo(() => {
     const seen = new Set<string>();
     const result: any[] = [];
@@ -75,7 +93,12 @@ function HomeContent() {
       });
     }
     
-    return result;
+    // Sort ALL manga by update time (newest first) - continuous across all pages
+    return result.sort((a, b) => {
+      const timeA = parseUpdatedAtToMinutes(a.updatedAt);
+      const timeB = parseUpdatedAtToMinutes(b.updatedAt);
+      return timeA - timeB;
+    });
   }, [homeQuery.data?.latest, latestInfiniteQuery.data?.pages]);
 
   const isInitialLoading = homeQuery.isLoading;
