@@ -137,8 +137,7 @@ function HomeContent() {
             </div>
 
             <div className="relative">
-              {/* Fade gradient indicators */}
-              <div className="absolute left-0 top-0 bottom-2 w-6 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+              {/* Right fade gradient indicator only */}
               <div className="absolute right-0 top-0 bottom-2 w-6 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
               
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
@@ -486,53 +485,43 @@ function HomeContent() {
         </div>
       </main>
 
-      {/* Footer - Premium Design */}
-      <footer ref={footerRef} className="relative border-t border-white/10 py-10 sm:py-12 md:py-16 pb-20 sm:pb-24 mt-10 sm:mt-12 md:mt-16 overflow-hidden">
-        {/* Background Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-card to-transparent" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+      {/* Footer - Simple & Clean */}
+      <footer ref={footerRef} className="relative border-t border-white/10 mt-auto overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-background to-transparent" />
         
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-10 md:mb-12 text-center sm:text-left">
-            <div className="space-y-4 sm:space-y-6 md:col-span-2">
-               <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-                 <span className="text-white">Manga</span>
-                 <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">Ku</span>
-               </h1>
-               <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-md mx-auto md:mx-0">
-                 Platform baca manga favoritmu dengan tampilan modern, cepat, dan nyaman. 
-                 Nikmati ribuan judul manga, manhwa, dan manhua secara gratis.
-               </p>
-               <div className="flex gap-3 justify-center md:justify-start">
-                 {/* Social Icons Placeholder */}
-               </div>
-            </div>
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 relative z-10 flex flex-col min-h-[300px] sm:min-h-[350px] py-10 sm:py-14">
+          {/* Main Footer Content - Centered */}
+          <div className="text-center space-y-6">
+            {/* Logo */}
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+              <span className="text-white">Manga</span>
+              <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">Ku</span>
+            </h1>
             
-            <div className="space-y-3 sm:space-y-4">
-               <h3 className="font-bold text-white text-base sm:text-lg">Navigasi</h3>
-               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                 <li><Link href="/" className="text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
-                 <li><Link href="/bookmarks" className="text-muted-foreground hover:text-primary transition-colors">Bookmark</Link></li>
-                 <li><Link href="/search" className="text-muted-foreground hover:text-primary transition-colors">Pencarian</Link></li>
-               </ul>
-            </div>
-
-            <div className="space-y-3 sm:space-y-4">
-               <h3 className="font-bold text-white text-base sm:text-lg">Legal</h3>
-               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                 <li><span className="text-muted-foreground/50 cursor-not-allowed">DMCA</span></li>
-                 <li><span className="text-muted-foreground/50 cursor-not-allowed">Privacy Policy</span></li>
-                 <li><span className="text-muted-foreground/50 cursor-not-allowed">Terms of Service</span></li>
-               </ul>
-            </div>
+            {/* Tagline */}
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Platform baca manga favoritmu dengan tampilan modern, cepat, dan nyaman.
+            </p>
+            
+            {/* Navigation Links - Horizontal */}
+            <nav className="flex items-center justify-center gap-6 sm:gap-8 text-sm">
+              <Link href="/" className="text-white/60 hover:text-primary transition-colors">Home</Link>
+              <Link href="/bookmarks" className="text-white/60 hover:text-primary transition-colors">Bookmark</Link>
+              <Link href="/search" className="text-white/60 hover:text-primary transition-colors">Pencarian</Link>
+            </nav>
           </div>
           
-          <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-6 sm:my-8" />
+          {/* Spacer to push copyright down */}
+          <div className="flex-1" />
           
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground/60 text-center md:text-left">
+          {/* Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4" />
+          
+          {/* Copyright - At bottom */}
+          <div className="text-center text-xs text-muted-foreground/50 space-y-1 pb-4">
             <p>&copy; {new Date().getFullYear()} MangaKu. All rights reserved.</p>
-            <p className="text-[10px] sm:text-xs">Disclaimer: This site does not store any files on its server.</p>
+            <p className="text-[10px]">This site does not store any files on its server.</p>
           </div>
         </div>
       </footer>
