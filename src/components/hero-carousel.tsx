@@ -223,23 +223,20 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
         </div>
       </div>
 
-      {/* Dots Navigation - Enlarged for mobile touch */}
-      <div className="absolute bottom-3 md:bottom-4 lg:bottom-6 left-1/2 -translate-x-1/2 flex gap-1 md:gap-1.5 z-10
-        bg-black/30 backdrop-blur-sm rounded-full px-2 md:px-3 py-2">
+      {/* Dots Navigation - Compact design */}
+      <div className="absolute bottom-3 md:bottom-4 lg:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2 z-10
+        bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5">
         {carouselItems.map((_, index) => (
           <button
             key={index}
-            className={`min-w-[44px] min-h-[44px] md:min-w-[32px] md:min-h-[32px] flex items-center justify-center
-              transition-all duration-300 rounded-full hover:bg-white/10`}
+            className={`w-3 h-3 md:w-2.5 md:h-2.5 rounded-full transition-all duration-300 ${
+              index === selectedIndex 
+                ? 'w-6 md:w-8 bg-gradient-to-r from-primary to-blue-400 shadow-lg shadow-primary/50' 
+                : 'bg-white/40 hover:bg-white/60'
+            }`}
             onClick={() => scrollTo(index)}
             aria-label={`Go to slide ${index + 1}`}
-          >
-            <span className={`block rounded-full transition-all duration-500 ease-out ${
-              index === selectedIndex 
-                ? 'w-6 md:w-8 h-2 md:h-2.5 bg-gradient-to-r from-primary to-blue-400 shadow-lg shadow-primary/50' 
-                : 'w-2 h-2 md:w-2.5 md:h-2.5 bg-white/40 hover:bg-white/60'
-            }`} />
-          </button>
+          />
         ))}
       </div>
     </div>
