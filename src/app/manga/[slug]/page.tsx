@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -11,10 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Pen, MapPin, Star, BookOpen, Zap, Library, FileQuestion, Clock, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
+import { ArrowLeft, Pen, MapPin, Star, BookOpen, Zap, Library, FileQuestion, Clock, Eye, Bookmark, BookmarkCheck, AlertTriangle } from 'lucide-react';
 import { useFadeIn } from '@/hooks/use-anime';
 import { useBookmarks, type BookmarkedManga } from '@/hooks/use-bookmarks';
 import { Breadcrumb } from '@/components/breadcrumb';
+
+// 18+ content genres to check for
+const ADULT_GENRES = ['adult', 'mature', 'ecchi', 'smut', 'hentai', '18+', 'gore', 'erotica'];
 
 export default function MangaDetailPage() {
   const params = useParams();
@@ -42,6 +46,23 @@ export default function MangaDetailPage() {
   // Bookmark functionality
   const { isBookmarked, toggle: toggleBookmark } = useBookmarks();
   const bookmarked = manga ? isBookmarked(slug) : false;
+
+  // 18+ content warning state
+  const [showAdultWarning, setShowAdultWarning] = useState(false);
+  const [adultWarningAccepted, setAdultWarningAccepted] = useState(false);
+  const router = useRouter();
+
+  // Check if manga contains adult content
+  const isAdultContent = manga?.genres?.some(genre => 
+    ADULT_GENRES.includes(genre.toLowerCase())
+  ) ?? false;
+
+  // Show warning on first load if adult content detected and not yet accepted
+  useEffect(() => {
+    if (manga && isAdultContent && !adultWarningAccepted) {
+      setShowAdultWarning(true);
+    }
+  }, [manga, isAdultContent, adultWarningAccepted]);
 
   if (isLoading) {
     return (
@@ -100,6 +121,61 @@ export default function MangaDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* 18+ Content Warning Modal */}
+      {showAdultWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-card border border-red-500/30 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl shadow-red-500/20 animate-in fade-in zoom-in duration-300">
+            <div className="flex flex-col items-center text-center">
+              {/* Warning Icon */}
+              <div className="p-4 bg-red-500/20 rounded-full mb-4">
+                <AlertTriangle className="w-12 h-12 text-red-500" />
+              </div>
+              
+              {/* Title */}
+              <h2 className="text-xl sm:text-2xl font-bold text-red-500 mb-2">
+                Konten Dewasa (18+)
+              </h2>
+              
+              {/* Message */}
+              <p className="text-muted-foreground mb-6 text-sm sm:text-base">
+                Manga ini mengandung konten dewasa yang tidak sesuai untuk anak di bawah umur. 
+                Dengan melanjutkan, Anda menyatakan bahwa Anda berusia <span className="text-white font-semibold">18 tahun atau lebih</span>.
+              </p>
+              
+              {/* Content warning badges */}
+              <div className="flex flex-wrap justify-center gap-2 mb-6">
+                {manga?.genres?.filter(g => ADULT_GENRES.includes(g.toLowerCase())).map(genre => (
+                  <Badge key={genre} className="bg-red-500/20 text-red-400 border-red-500/30">
+                    {genre}
+                  </Badge>
+                ))}
+              </div>
+              
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Button 
+                  variant="outline"
+                  className="flex-1 border-white/20 hover:bg-white/10"
+                  onClick={() => router.back()}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Kembali
+                </Button>
+                <Button 
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                  onClick={() => {
+                    setAdultWarningAccepted(true);
+                    setShowAdultWarning(false);
+                  }}
+                >
+                  Saya 18+ Tahun
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Background - Minimal */}
       <div className="relative h-[60px] md:h-[80px] overflow-hidden">
