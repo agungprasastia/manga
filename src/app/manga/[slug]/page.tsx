@@ -187,7 +187,7 @@ export default function MangaDetailPage() {
   // Helper function to build chapter URL with proper query string
   const buildChapterUrl = (chapterSlug: string) => {
     const params = new URLSearchParams();
-    if (source) params.set('source', source);
+    if (manga?.source) params.set('source', manga.source);
     if (coverParam) params.set('cover', coverParam);
     const queryString = params.toString();
     return `/chapter/${chapterSlug}${queryString ? `?${queryString}` : ''}`;
@@ -329,7 +329,7 @@ export default function MangaDetailPage() {
                     type: manga.type,
                     rating: manga.rating,
                     latestChapter: lastChapter?.title,
-                    source: source || undefined,
+                    source: manga.source,
                     addedAt: Date.now(),
                   };
                   toggleBookmark(bookmarkData);
