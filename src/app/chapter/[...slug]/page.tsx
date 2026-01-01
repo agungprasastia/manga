@@ -248,15 +248,7 @@ export default function ChapterReaderPage() {
                 variant="ghost" 
                 size="sm" 
                 onClick={() => {
-                  if (chapter?.mangaSlug) {
-                    const params = new URLSearchParams();
-                    if (source) params.set('source', source);
-                    if (coverParam) params.set('cover', coverParam);
-                    const queryString = params.toString();
-                    router.push(`/manga/${chapter.mangaSlug}${queryString ? `?${queryString}` : ''}`);
-                  } else {
-                    router.back();
-                  }
+                  router.back();
                 }}
                 className="gap-1 sm:gap-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 h-8 sm:h-9 px-2 sm:px-3"
               >
