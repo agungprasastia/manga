@@ -26,7 +26,7 @@ export default function MangaDetailPage() {
   const slug = params.slug as string;
 
   const searchParams = useSearchParams();
-  const source = searchParams.get('source') as 'komiku' | 'kiryuu' | undefined;
+  const source = searchParams.get('source') as 'komiku' | 'softkomik' | undefined;
   const coverParam = searchParams.get('cover');
 
   const { data: mangaData, isLoading, error } = useQuery({
