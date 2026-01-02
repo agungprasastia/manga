@@ -248,7 +248,15 @@ export default function ChapterReaderPage() {
                 variant="ghost" 
                 size="sm" 
                 onClick={() => {
-                  router.back();
+                  // Navigate to manga detail page instead of back() to avoid going to previous chapter
+                  if (chapterData?.mangaSlug) {
+                    const params = new URLSearchParams();
+                    if (source) params.set('source', source);
+                    const queryString = params.toString();
+                    router.push(`/manga/${chapterData.mangaSlug}${queryString ? `?${queryString}` : ''}`);
+                  } else {
+                    router.back();
+                  }
                 }}
                 className="gap-1 sm:gap-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 h-8 sm:h-9 px-2 sm:px-3"
               >
