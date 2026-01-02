@@ -11,10 +11,9 @@ interface MangaCardProps {
 }
 
 export function MangaCard({ manga, priority = false }: MangaCardProps) {
-  // Build URL with source and cover params for consistency
+  // Build URL with source param only - cover will be fetched from API
   const params = new URLSearchParams();
   if (manga.source) params.set('source', manga.source);
-  if (manga.cover) params.set('cover', manga.cover);
   const queryString = params.toString();
   const href = `/manga/${manga.slug}${queryString ? `?${queryString}` : ''}`;
 

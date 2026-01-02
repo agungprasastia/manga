@@ -141,8 +141,7 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
 
                     {/* Button */}
                     <Link href={`/manga/${manga.slug}?${new URLSearchParams({
-                          ...(manga.source && { source: manga.source }),
-                          ...(manga.cover && { cover: manga.cover })
+                          ...(manga.source && { source: manga.source })
                         }).toString()}`} className="w-full max-w-xs">
                        <Button className="w-full bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-400 text-white font-bold h-11 rounded-xl shadow-lg shadow-primary/30 text-sm transition-all hover:-translate-y-0.5">
                          <BookOpen className="w-4 h-4 mr-2" />
@@ -209,8 +208,7 @@ export function HeroCarousel({ mangaList }: { mangaList: Manga[] }) {
                       {/* CTA Button */}
                       <div className="pt-4">
                         <Link href={`/manga/${manga.slug}?${new URLSearchParams({
-                          ...(manga.source && { source: manga.source }),
-                          ...(manga.cover && { cover: manga.cover })
+                          ...(manga.source && { source: manga.source })
                         }).toString()}`} className="w-auto">
                           <Button size="lg" className="h-12 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-400 text-white font-bold border-none px-8 rounded-xl shadow-lg shadow-primary/30 transition-all hover:-translate-y-0.5">
                             <BookOpen className="w-4 h-4 mr-2" />

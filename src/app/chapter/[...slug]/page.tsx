@@ -248,12 +248,11 @@ export default function ChapterReaderPage() {
                 variant="ghost" 
                 size="sm" 
                 onClick={() => {
-                  // Navigate to manga detail page instead of back() to avoid going to previous chapter
                   if (chapterData?.mangaSlug) {
                     const params = new URLSearchParams();
                     if (source) params.set('source', source);
                     const queryString = params.toString();
-                    router.push(`/manga/${chapterData.mangaSlug}${queryString ? `?${queryString}` : ''}`);
+                    router.replace(`/manga/${chapterData.mangaSlug}${queryString ? `?${queryString}` : ''}`);
                   } else {
                     router.back();
                   }

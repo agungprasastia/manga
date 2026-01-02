@@ -162,7 +162,6 @@ function HomeContent() {
                     href={(() => {
                       const params = new URLSearchParams();
                       if (item.source) params.set('source', item.source);
-                      if (item.mangaCover) params.set('cover', item.mangaCover);
                       const queryString = params.toString();
                       return `/chapter/${item.chapterSlug}${queryString ? `?${queryString}` : ''}`;
                     })()}
@@ -335,8 +334,7 @@ function HomeContent() {
                        {popularManga?.slice(0, 8).map((manga: any, index: number) => (
                          <Link 
                            href={`/manga/${manga.slug}?${new URLSearchParams({
-                             ...(manga.source && { source: manga.source }),
-                             ...(manga.cover && { cover: manga.cover })
+                             ...(manga.source && { source: manga.source })
                            }).toString()}`} 
                            key={manga.slug}
                            className="shrink-0 w-28 group"
@@ -402,8 +400,7 @@ function HomeContent() {
                        {popularManga?.slice(0, 5).map((manga: any, index: number) => (
                          <Link 
                            href={`/manga/${manga.slug}?${new URLSearchParams({
-                             ...(manga.source && { source: manga.source }),
-                             ...(manga.cover && { cover: manga.cover })
+                             ...(manga.source && { source: manga.source })
                            }).toString()}`} 
                            key={manga.slug}
                            className="flex gap-4 p-4 hover:bg-white/5 transition-all duration-300 group relative"

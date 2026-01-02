@@ -27,7 +27,6 @@ export default function MangaDetailPage() {
 
   const searchParams = useSearchParams();
   const source = searchParams.get('source') as 'komiku' | 'softkomik' | undefined;
-  const coverParam = searchParams.get('cover');
 
   const { data: mangaData, isLoading, error } = useQuery({
     queryKey: ['manga', slug, source],
@@ -35,11 +34,8 @@ export default function MangaDetailPage() {
     enabled: !!slug,
   });
 
-  // Use cover from params if available (for consistency with list view), otherwise use API
-  const manga = mangaData ? {
-    ...mangaData,
-    cover: coverParam || mangaData.cover
-  } : undefined;
+  // Always use cover from API response to match the selected source
+  const manga = mangaData;
 
   // Anime.js fade-in animation for cover (must be called before conditional returns)
   const coverRef = useFadeIn<HTMLDivElement>([mangaData], { from: 'scale', duration: 600 });
@@ -188,7 +184,7 @@ export default function MangaDetailPage() {
   const buildChapterUrl = (chapterSlug: string) => {
     const params = new URLSearchParams();
     if (manga?.source) params.set('source', manga.source);
-    if (coverParam) params.set('cover', coverParam);
+    if (manga?.cover) params.set('cover', manga.cover);
     const queryString = params.toString();
     return `/chapter/${chapterSlug}${queryString ? `?${queryString}` : ''}`;
   };
