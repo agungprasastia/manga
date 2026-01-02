@@ -143,7 +143,7 @@ function HomeContent() {
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
               {history.slice(0, 5).map((item) => (
                 <div key={item.mangaSlug} className="shrink-0 w-36 sm:w-44 group relative">
-                  {/* Remove Button - Improved touch target */}
+                  {/* Remove Button - Always visible on mobile, hover on desktop */}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -151,8 +151,8 @@ function HomeContent() {
                       removeProgress(item.mangaSlug);
                     }}
                     className="absolute top-1.5 right-1.5 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm
-                      flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity
-                      hover:bg-red-500/80 text-white/70 hover:text-white"
+                      flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity
+                      hover:bg-red-500/80 active:bg-red-500/80 text-white/70 hover:text-white"
                     aria-label={`Hapus ${item.mangaTitle} dari riwayat`}
                   >
                     <X className="w-3 h-3" />
