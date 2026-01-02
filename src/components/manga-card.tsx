@@ -1,8 +1,11 @@
+'use client';
+
 import { BookOpen } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { getRelativeTime } from '@/lib/utils';
+import { useEnhancedCover } from '@/hooks/use-enhanced-cover';
 import type { Manga } from '@/lib/api';
 
 interface MangaCardProps {
@@ -25,26 +28,29 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
     ? getRelativeTime(manga.updatedTimestamp) 
     : manga.updatedAt;
 
+  // Lazy load enhanced cover in background
+  const cover = useEnhancedCover(manga.slug, manga.source, manga.cover || '/placeholder.jpg');
+
   return (
     <Link 
       href={href} 
       className="block group tap-transparent touch-manipulation active:scale-[0.98] transition-transform"
       title={manga.title}
     >
-      <div className="relative aspect-[3/4.5] overflow-hidden rounded-lg sm:rounded-xl bg-muted/50 
-        shadow-lg shadow-black/20
+      <div className="relative aspect-[2/3] overflow-hidden rounded-lg sm:rounded-xl 
+        shadow-lg shadow-black/30 bg-card
         transition-all duration-500 ease-out
-        group-hover:shadow-2xl group-hover:shadow-primary/20
+        group-hover:shadow-2xl group-hover:shadow-primary/30
         group-hover:-translate-y-1 sm:group-hover:-translate-y-2
-        group-hover:ring-2 group-hover:ring-primary/30
+        group-hover:ring-2 group-hover:ring-primary/40
         ">
         
-        {/* Image */}
+        {/* Image with smooth transition when enhanced cover loads */}
         <Image
-          src={manga.cover || '/placeholder.jpg'}
+          src={cover}
           alt={manga.title}
           fill
-          className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+          className="object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           priority={priority}
           onError={(e) => {
@@ -54,16 +60,11 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
         />
 
         {/* Gradient Overlay - Enhanced */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent 
-          opacity-70 group-hover:opacity-90 transition-all duration-300" />
-        
-        {/* Shimmer effect on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500
-          bg-gradient-to-r from-transparent via-white/10 to-transparent
-          -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent 
+          opacity-80" />
 
         {/* Top badges row */}
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5">
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5 z-10">
           {/* NEW Badge */}
           {isNew && (
             <span className="h-4 sm:h-5 px-1.5 bg-green-500 text-white text-[8px] sm:text-[9px] font-bold rounded flex items-center shadow-md">
@@ -91,7 +92,7 @@ export function MangaCard({ manga, priority = false }: MangaCardProps) {
 
         {/* Content positioned at bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3 md:p-4 space-y-1 sm:space-y-1.5 md:space-y-2
-          transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+          transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 z-10">
            
           {/* Title */}
           <h3 className="font-bold text-xs sm:text-sm text-white line-clamp-2 leading-snug 

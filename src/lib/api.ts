@@ -106,3 +106,19 @@ export async function getChapter(slug: string, source?: 'komiku' | 'softkomik'):
     }
     return res.data.data;
 }
+
+// Get enhanced cover for lazy loading
+export async function getEnhancedCover(slug: string, source?: string): Promise<string | null> {
+    try {
+        const res = await api.get<ApiResponse<{ cover: string; source: string }>>(`/cover/${slug}`, {
+            params: { source },
+            timeout: 10000, // Shorter timeout for cover enhancement
+        });
+        if (res.data.success && res.data.data?.cover) {
+            return res.data.data.cover;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
