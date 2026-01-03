@@ -14,7 +14,7 @@ export interface Manga {
     type?: string;
     chapter?: string;
     rating?: string;
-    source?: 'komikcast' | 'komiku';
+    source?: 'komikcast';
     updatedAt?: string;  // Relative time like "5 menit lalu", "2 jam lalu"
     updatedTimestamp?: string; // ISO timestamp for realtime calculation
 }
@@ -36,7 +36,7 @@ export interface MangaDetail {
     genres: string[];
     rating?: string;
     chapters: Chapter[];
-    source?: 'komikcast' | 'komiku';
+    source?: 'komikcast';
 }
 
 export interface ChapterImages {
@@ -87,7 +87,7 @@ export async function searchManga(query: string): Promise<Manga[]> {
     return res.data.data;
 }
 
-export async function getMangaDetail(slug: string, source?: 'komikcast' | 'komiku'): Promise<MangaDetail> {
+export async function getMangaDetail(slug: string, source?: 'komikcast'): Promise<MangaDetail> {
     const res = await api.get<ApiResponse<MangaDetail>>(`/manga/${slug}`, {
         params: { source },
     });
@@ -97,7 +97,7 @@ export async function getMangaDetail(slug: string, source?: 'komikcast' | 'komik
     return res.data.data;
 }
 
-export async function getChapter(slug: string, source?: 'komikcast' | 'komiku'): Promise<ChapterImages> {
+export async function getChapter(slug: string, source?: 'komikcast'): Promise<ChapterImages> {
     const res = await api.get<ApiResponse<ChapterImages>>(`/chapter/${slug}`, {
         params: { source },
     });

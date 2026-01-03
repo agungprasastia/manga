@@ -9,7 +9,7 @@ export interface BookmarkedManga {
     type?: string;
     rating?: string;
     latestChapter?: string;
-    source?: 'komikcast' | 'komiku';
+    source?: 'komikcast';
     addedAt: number;
 }
 

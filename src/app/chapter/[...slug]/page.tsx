@@ -14,7 +14,7 @@ export default function ChapterReaderPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const source = searchParams.get('source') as 'komikcast' | 'komiku' | undefined;
+  const source = searchParams.get('source') as 'komikcast' | undefined;
   const coverParam = searchParams.get('cover'); // Get cover param
 
   const slugParts = params.slug as string[];
