@@ -14,7 +14,7 @@ export interface Manga {
     type?: string;
     chapter?: string;
     rating?: string;
-    source?: 'komiku' | 'softkomik';
+    source?: 'kiryuu' | 'komiku' | 'softkomik';
     updatedAt?: string;  // Relative time like "5 menit lalu", "2 jam lalu"
     updatedTimestamp?: string; // ISO timestamp for realtime calculation
 }
@@ -36,7 +36,7 @@ export interface MangaDetail {
     genres: string[];
     rating?: string;
     chapters: Chapter[];
-    source?: 'komiku' | 'softkomik';
+    source?: 'kiryuu' | 'komiku' | 'softkomik';
 }
 
 export interface ChapterImages {
@@ -87,7 +87,7 @@ export async function searchManga(query: string): Promise<Manga[]> {
     return res.data.data;
 }
 
-export async function getMangaDetail(slug: string, source?: 'komiku' | 'softkomik'): Promise<MangaDetail> {
+export async function getMangaDetail(slug: string, source?: 'kiryuu' | 'komiku' | 'softkomik'): Promise<MangaDetail> {
     const res = await api.get<ApiResponse<MangaDetail>>(`/manga/${slug}`, {
         params: { source },
     });
@@ -97,7 +97,7 @@ export async function getMangaDetail(slug: string, source?: 'komiku' | 'softkomi
     return res.data.data;
 }
 
-export async function getChapter(slug: string, source?: 'komiku' | 'softkomik'): Promise<ChapterImages> {
+export async function getChapter(slug: string, source?: 'kiryuu' | 'komiku' | 'softkomik'): Promise<ChapterImages> {
     const res = await api.get<ApiResponse<ChapterImages>>(`/chapter/${slug}`, {
         params: { source },
     });
