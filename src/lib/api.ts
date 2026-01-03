@@ -87,7 +87,7 @@ export async function searchManga(query: string): Promise<Manga[]> {
     return res.data.data;
 }
 
-export async function getMangaDetail(slug: string, source?: 'kiryuu' | 'komiku' | 'softkomik'): Promise<MangaDetail> {
+export async function getMangaDetail(slug: string, source?: 'komikcast' | 'komiku'): Promise<MangaDetail> {
     const res = await api.get<ApiResponse<MangaDetail>>(`/manga/${slug}`, {
         params: { source },
     });
@@ -97,7 +97,7 @@ export async function getMangaDetail(slug: string, source?: 'kiryuu' | 'komiku' 
     return res.data.data;
 }
 
-export async function getChapter(slug: string, source?: 'kiryuu' | 'komiku' | 'softkomik'): Promise<ChapterImages> {
+export async function getChapter(slug: string, source?: 'komikcast' | 'komiku'): Promise<ChapterImages> {
     const res = await api.get<ApiResponse<ChapterImages>>(`/chapter/${slug}`, {
         params: { source },
     });

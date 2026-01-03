@@ -9,7 +9,7 @@ export interface BookmarkedManga {
     type?: string;
     rating?: string;
     latestChapter?: string;
-    source?: 'kiryuu' | 'komiku' | 'softkomik';
+    source?: 'komikcast' | 'komiku';
     addedAt: number;
 }
 
