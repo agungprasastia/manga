@@ -173,7 +173,7 @@ export function Header() {
           {results.slice(0, 5).map((manga) => (
             <Link
               key={manga.slug}
-              href={`/manga/${manga.slug}`}
+              href={`/manga/${manga.slug}${manga.source ? `?source=${manga.source}` : ''}`}
               className="flex gap-3 p-3 hover:bg-white/5 transition-all duration-200
                 border-b border-white/5 last:border-none group/item w-full text-left"
               onClick={handleResultClick}
